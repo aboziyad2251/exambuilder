@@ -335,21 +335,17 @@
 
       observer.observe(document.documentElement, { attributes: true });
 
-      // Also watch #root text for quick language toggles which might not update HTML dir sometimes
-      setTimeout(() => { // wait for root to mount
-        const rootObserver = new MutationObserver(() => {
-          const isArabicNow = document.body.innerText.includes('مستوى التعليم') || document.body.innerText.includes('إنشاء امتحان');
-          const detectedLang = isArabicNow ? 'ar' : 'en';
-          if (detectedLang !== currentLang) {
-            currentLang = detectedLang;
-            updateLocale(currentLang);
-          }
-        });
-        const rootEl = document.documentElement;
-        if (rootEl) {
-          rootObserver.observe(rootEl, { childList: true, subtree: true, characterData: true });
+      observer.observe(document.documentElement, { attributes: true });
+
+      // Backup periodic check specifically for toggle instead of heavy DOM mutation
+      setInterval(() => {
+        const isArabicNow = document.body.innerText.indexOf('مستوى التعليم') > -1 || document.body.innerText.indexOf('إنشاء امتحان') > -1;
+        const detectedLang = isArabicNow ? 'ar' : 'en';
+        if (detectedLang !== currentLang) {
+          currentLang = detectedLang;
+          updateLocale(currentLang);
         }
-      }, 1000);
+      }, 1500);
     })();
   </script>
 </body>
