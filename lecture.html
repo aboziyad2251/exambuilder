@@ -167,7 +167,7 @@
   class="bg-slate-50 text-slate-900 dark:bg-slate-50 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
   <!-- Interactive Aurora Background Canvas -->
   <canvas id="aurora"
-    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; opacity: 0.6;"></canvas>
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; opacity: 0.6; pointer-events: none;"></canvas>
 
   <!-- App Header -->
   <header class="p-6 flex justify-between items-center z-10 w-full max-w-6xl mx-auto">
@@ -197,14 +197,16 @@
         <h2
           class="text-4xl font-extrabold mb-4 bg-gradient-to-r from-slate-50 dark:from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
           Transform Lectures into Knowledge</h2>
-        <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 text-lg">Upload any PDF lecture. Get AI summaries, structured
+        <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 text-lg">Upload any PDF lecture. Get AI
+          summaries, structured
           notes, concept cards, and
           a generated exam instantly.</p>
       </div>
 
       <div class="flex justify-center mb-6">
         <div class="glass-card p-4 rounded-xl flex flex-col gap-2 w-full max-w-sm">
-          <label class="text-sm font-semibold text-slate-700 dark:text-slate-700 dark:text-slate-300 flex items-center gap-2">
+          <label
+            class="text-sm font-semibold text-slate-700 dark:text-slate-700 dark:text-slate-300 flex items-center gap-2">
             <i data-lucide="graduation-cap" class="w-4 h-4 text-violet-500 dark:text-violet-400"></i> Education Level
           </label>
           <select id="education-level"
@@ -227,12 +229,15 @@
           <div
             class="absolute inset-0 rounded-full bg-violet-500/20 dark:bg-violet-500/30 blur-xl group-hover:bg-violet-500/40 dark:group-hover:bg-violet-500/50 transition-colors">
           </div>
-          <i data-lucide="upload-cloud" class="w-10 h-10 text-violet-600 dark:text-violet-700 dark:text-violet-300 relative z-10"></i>
+          <i data-lucide="upload-cloud"
+            class="w-10 h-10 text-violet-600 dark:text-violet-700 dark:text-violet-300 relative z-10"></i>
         </div>
 
-        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-2" id="file-name-display">Drag & Drop PDF Here
+        <h3 class="text-xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-2" id="file-name-display">
+          Drag & Drop PDF Here
         </h3>
-        <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 mb-6" id="file-size-display">or click to browse files (max 50MB)
+        <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 mb-6" id="file-size-display">or click to browse
+          files (max 50MB)
         </p>
 
         <button id="select-file-btn"
@@ -264,9 +269,11 @@
           class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-violet-400"></i>
       </div>
 
-      <h2 id="loading-text" class="text-2xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-2 animate-pulse">Reading lecture
+      <h2 id="loading-text"
+        class="text-2xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-2 animate-pulse">Reading lecture
         content...</h2>
-      <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 text-center max-w-md">Our AI is processing the PDF and generating a
+      <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 text-center max-w-md">Our AI is processing the
+        PDF and generating a
         comprehensive
         structured analysis. This may take a minute.</p>
     </section>
@@ -311,7 +318,8 @@
 
           <div class="mb-10">
             <h3 class="text-xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-3">Overview</h3>
-            <p id="res-overview" class="text-slate-700 dark:text-slate-700 dark:text-slate-300 leading-relaxed text-lg"></p>
+            <p id="res-overview" class="text-slate-700 dark:text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
+            </p>
           </div>
 
           <h3 class="text-xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-4">Chapter Breakdown</h3>
@@ -320,7 +328,8 @@
 
         <!-- Notes Tab -->
         <div id="tab-notes" class="tab-content hidden glass-card p-6 md:p-10 rounded-3xl ai-notes">
-          <div class="flex justify-end gap-3 mb-6 border-b border-slate-300 dark:border-black/10 dark:border-white/10 pb-4">
+          <div
+            class="flex justify-end gap-3 mb-6 border-b border-slate-300 dark:border-black/10 dark:border-white/10 pb-4">
             <button id="copy-notes-btn"
               class="px-4 py-2 rounded-lg bg-black/5 dark:bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 text-slate-700 dark:text-slate-700 dark:text-slate-300 text-sm font-medium flex items-center gap-2 transition-colors"><i
                 data-lucide="copy" class="w-4 h-4"></i> Copy Notes</button>
@@ -330,7 +339,8 @@
 
         <!-- Concepts Tab -->
         <div id="tab-concepts" class="tab-content hidden">
-          <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-6">Core Concepts to Remember</h3>
+          <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-900 dark:text-white mb-6">Core Concepts to
+            Remember</h3>
           <div id="res-concepts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"></div>
         </div>
 
@@ -341,12 +351,15 @@
               class="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(217,70,239,0.3)]">
               <i data-lucide="award" class="w-10 h-10 text-slate-900 dark:text-white"></i>
             </div>
-            <h2 class="text-3xl font-extrabold mb-4 text-slate-900 dark:text-slate-900 dark:text-white">Generate Mock Exam</h2>
-            <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 text-lg mb-6 max-w-md mx-auto">Select your desired difficulty
+            <h2 class="text-3xl font-extrabold mb-4 text-slate-900 dark:text-slate-900 dark:text-white">Generate Mock
+              Exam</h2>
+            <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 text-lg mb-6 max-w-md mx-auto">Select your
+              desired difficulty
               to generate 20 intelligent questions specifically tailored to this lecture.</p>
 
             <div class="mb-8 max-w-xs mx-auto text-left">
-              <label class="text-sm font-semibold text-slate-700 dark:text-slate-700 dark:text-slate-300 flex items-center gap-2 mb-2">
+              <label
+                class="text-sm font-semibold text-slate-700 dark:text-slate-700 dark:text-slate-300 flex items-center gap-2 mb-2">
                 <i data-lucide="target" class="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400"></i> Exam Difficulty
               </label>
               <select id="exam-difficulty"
@@ -368,19 +381,22 @@
             <div
               class="w-16 h-16 mx-auto mb-6 border-4 border-violet-500 border-t-transparent rounded-full animate-[spin_1s_linear_infinite]">
             </div>
-            <h3 class="text-xl font-bold text-slate-900 dark:text-slate-900 dark:text-white animate-pulse">Crafting unique questions...</h3>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-slate-900 dark:text-white animate-pulse">Crafting
+              unique questions...</h3>
             <p class="text-slate-600 dark:text-slate-600 dark:text-slate-400 mt-2">This may take 10-15 seconds.</p>
           </div>
 
           <div id="exam-runner" class="hidden">
-            <div class="flex justify-between items-center mb-8 border-b border-slate-300 dark:border-black/10 dark:border-white/10 pb-4">
-              <span class="text-slate-600 dark:text-slate-600 dark:text-slate-400 font-medium">Question <span id="q-current"
-                  class="text-violet-600 dark:text-violet-400 text-lg">1</span> of 20</span>
+            <div
+              class="flex justify-between items-center mb-8 border-b border-slate-300 dark:border-black/10 dark:border-white/10 pb-4">
+              <span class="text-slate-600 dark:text-slate-600 dark:text-slate-400 font-medium">Question <span
+                  id="q-current" class="text-violet-600 dark:text-violet-400 text-lg">1</span> of 20</span>
               <span id="q-topic-badge"
                 class="px-3 py-1 rounded-full bg-fuchsia-100 dark:bg-black/5 dark:bg-white/5 border border-fuchsia-200 dark:border-black/10 dark:border-white/10 text-xs text-fuchsia-700 dark:text-fuchsia-300 font-medium">Topic</span>
             </div>
 
-            <h3 id="q-text" class="text-2xl text-slate-900 dark:text-slate-900 dark:text-white font-medium mb-8 leading-snug"></h3>
+            <h3 id="q-text"
+              class="text-2xl text-slate-900 dark:text-slate-900 dark:text-white font-medium mb-8 leading-snug"></h3>
 
             <div id="q-options" class="flex flex-col gap-3 mb-10">
               <!-- Options populated by JS -->
@@ -399,8 +415,8 @@
             <h2
               class="text-4xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-cyan-500 dark:from-emerald-400 dark:to-cyan-400">
               Exam Completed!</h2>
-            <p class="text-xl text-slate-700 dark:text-slate-700 dark:text-slate-300 mb-8">You scored <span id="exam-score"
-                class="font-bold text-slate-900 dark:text-slate-900 dark:text-white"></span>
+            <p class="text-xl text-slate-700 dark:text-slate-700 dark:text-slate-300 mb-8">You scored <span
+                id="exam-score" class="font-bold text-slate-900 dark:text-slate-900 dark:text-white"></span>
               out of 20 (<span id="exam-percentage" class="text-emerald-600 dark:text-emerald-400 font-bold"></span>)
             </p>
             <button
@@ -418,7 +434,8 @@
             </div>
             <div>
               <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Google NotebookLM Integrator</h2>
-              <p class="text-slate-700 dark:text-slate-300 mb-6">Connect this lecture to your NotebookLM for hyper-accurate, source-grounded
+              <p class="text-slate-700 dark:text-slate-300 mb-6">Connect this lecture to your NotebookLM for
+                hyper-accurate, source-grounded
                 answers generated by Google's Audio Overview AI.</p>
 
               <div class="space-y-6">
@@ -428,8 +445,9 @@
                     1</div>
                   <div>
                     <p class="text-slate-900 dark:text-white font-medium mb-1">Upload to NotebookLM</p>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Go to <a href="https://notebooklm.google.com" target="_blank"
-                        class="text-blue-400 hover:underline">notebooklm.google.com</a> and upload your PDF there.</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Go to <a href="https://notebooklm.google.com"
+                        target="_blank" class="text-blue-400 hover:underline">notebooklm.google.com</a> and upload your
+                      PDF there.</p>
                   </div>
                 </div>
 
@@ -450,7 +468,8 @@
                     3</div>
                   <div class="w-full">
                     <p class="text-slate-900 dark:text-white font-medium mb-2">Ask Claude Code</p>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">Copy this magical prompt into your Claude Code terminal to
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">Copy this magical prompt into your Claude
+                      Code terminal to
                       automatically use the NotebookLM skill!</p>
 
                     <div class="relative">
@@ -577,35 +596,58 @@
     // Drag and Drop
     dropzone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropzone.classList.add('border-violet-500', 'bg-black/10 dark:bg-white/10');
+      e.stopPropagation();
+      dropzone.classList.add('border-violet-500', 'bg-black/10', 'dark:bg-white/10');
     });
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove('border-violet-500', 'bg-black/10 dark:bg-white/10');
+    dropzone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('border-violet-500', 'bg-black/10', 'dark:bg-white/10');
     });
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropzone.classList.remove('border-violet-500', 'bg-black/10 dark:bg-white/10');
-      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+      e.stopPropagation();
+      dropzone.classList.remove('border-violet-500', 'bg-black/10', 'dark:bg-white/10');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
     });
-    selectBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
-    dropzone.addEventListener('click', () => fileInput.click());
+
+    selectBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    dropzone.addEventListener('click', (e) => {
+      // Prevent clicking the file input itself from triggering another click
+      if (e.target !== fileInput && e.target !== selectBtn) {
+        fileInput.click();
+      }
+    });
+
     fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length) handleFile(e.target.files[0]);
+      if (e.target.files && e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
     });
 
     function handleFile(file) {
       if (file.type !== 'application/pdf') {
         alert("Please upload a PDF file.");
+        fileInput.value = '';
         return;
       }
       if (file.size > 50 * 1024 * 1024) {
         alert("File size too large (max 50MB).");
+        fileInput.value = '';
         return;
       }
       selectedFile = file;
       fileNameDisplay.textContent = file.name;
       document.getElementById('file-size-display').textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
       analyzeBtn.disabled = false;
+      fileInput.value = ''; // Reset input to allow selecting the same file again if needed
     }
 
     // PDF to Base64 (for small files)
@@ -752,15 +794,15 @@ Ensure the notes HTML string is clean and well-structured. Output strictly valid
       tab.addEventListener('click', (e) => {
         // Reset tabs
         document.querySelectorAll('.nav-tab').forEach(t => {
-          t.classList.remove('bg-violet-200 dark:bg-violet-600/20', 'text-violet-700 dark:text-violet-300', 'border-violet-500/30', 'active');
-          t.classList.add('text-slate-600 dark:text-slate-400', 'hover:bg-black/5 dark:bg-white/5');
+          t.classList.remove('bg-violet-200', 'dark:bg-violet-600/20', 'text-violet-700', 'dark:text-violet-300', 'border-violet-500/30', 'active');
+          t.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-black/5', 'dark:bg-white/5');
         });
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
 
         // Activate Tab
         const target = e.currentTarget;
-        target.classList.remove('text-slate-600 dark:text-slate-400', 'hover:bg-black/5 dark:bg-white/5');
-        target.classList.add('bg-violet-200 dark:bg-violet-600/20', 'text-violet-700 dark:text-violet-300', 'border-violet-500/30', 'active');
+        target.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-black/5', 'dark:bg-white/5');
+        target.classList.add('bg-violet-200', 'dark:bg-violet-600/20', 'text-violet-700', 'dark:text-violet-300', 'border-violet-500/30', 'active');
         document.getElementById(target.dataset.target).classList.remove('hidden');
       });
     });
