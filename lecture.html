@@ -594,41 +594,62 @@
     let globalExamData = [];
 
     // Drag and Drop
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.add('border-violet-500', 'bg-black/10', 'dark:bg-white/10');
-    });
-    dropzone.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.remove('border-violet-500', 'bg-black/10', 'dark:bg-white/10');
-    });
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropzone.classList.remove('border-violet-500', 'bg-black/10', 'dark:bg-white/10');
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        handleFile(e.dataTransfer.files[0]);
-      }
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, preventDefaults, false);
     });
 
-    selectBtn.addEventListener('click', (e) => {
+    function preventDefaults(e) {
       e.preventDefault();
       e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+      dropzone.classList.add('border-violet-500', 'bg-violet-500/10');
+    }
+
+    function unhighlight(e) {
+      dropzone.classList.remove('border-violet-500', 'bg-violet-500/10');
+    }
+
+    dropzone.addEventListener('drop', handleDrop, false);
+    function handleDrop(e) {
+      let dt = e.dataTransfer;
+      let files = dt.files;
+      if (files.length) handleFile(files[0]);
+    }
+
+    dropzone.addEventListener('click', (e) => {
+      // Don't trigger if it's the input itself bubbling up
+      if (e.target.tagName.toLowerCase() === 'input') return;
       fileInput.click();
     });
 
-    dropzone.addEventListener('click', (e) => {
-      // Prevent clicking the file input itself from triggering another click
-      if (e.target !== fileInput && e.target !== selectBtn) {
-        fileInput.click();
-      }
+    // selectBtn click gets naturally propagated to dropzone because it is inside it,
+    // which triggers the fileInput.click() above. So we don't strictly need a separate
+    // handler for selectBtn calling fileInput, but let's be explicit and stop propagation
+    // to avoid any dual triggers.
+    selectBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      fileInput.click();
     });
 
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files.length > 0) {
-        handleFile(e.target.files[0]);
+    // Stop the hidden input taking clicks and looping them up
+    fileInput.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    fileInput.addEventListener('change', function (e) {
+      if (this.files && this.files.length > 0) {
+        handleFile(this.files[0]);
       }
     });
 
