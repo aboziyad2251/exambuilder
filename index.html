@@ -331,6 +331,47 @@
             <div id="grades-dist-bars"><!-- built by JS --></div>
           </div>
 
+          <!-- ── GPA CALCULATOR ── -->
+          <div id="gpa-calc-section" class="gcard" style="padding:24px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+              <div>
+                <h2 class="dash-section-title" style="margin:0;">GPA Calculator</h2>
+                <p style="color:var(--text-muted,#94a3b8);font-size:12px;margin:4px 0 0;">Out of 5.0 — add your courses and grades</p>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button onclick="window.__gcAddRow()" style="padding:7px 14px;border-radius:9px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);color:#a78bfa;font-size:12px;font-weight:700;cursor:pointer;">+ Add Course</button>
+                <button onclick="window.__gcReset()" style="padding:7px 14px;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#64748b;font-size:12px;font-weight:700;cursor:pointer;">Reset</button>
+              </div>
+            </div>
+
+            <!-- Result banner -->
+            <div id="gc-result-banner" style="display:none;background:linear-gradient(135deg,rgba(139,92,246,0.18),rgba(219,39,119,0.12));border:1px solid rgba(139,92,246,0.3);border-radius:14px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <div style="text-align:center;min-width:80px;">
+                <div id="gc-gpa-val" style="font-size:36px;font-weight:900;color:#a78bfa;line-height:1;">0.00</div>
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-top:2px;">GPA / 5.0</div>
+              </div>
+              <div style="width:1px;height:40px;background:rgba(255,255,255,0.08);"></div>
+              <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                <div style="text-align:center;"><div id="gc-credits-val" style="font-size:18px;font-weight:800;color:#34d399;">0</div><div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;">Credit Hours</div></div>
+                <div style="text-align:center;"><div id="gc-grade-val" style="font-size:18px;font-weight:800;color:#fbbf24;">—</div><div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;">Letter Grade</div></div>
+                <div style="text-align:center;"><div id="gc-status-val" style="font-size:18px;font-weight:800;color:#38bdf8;">—</div><div style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;">Status</div></div>
+              </div>
+            </div>
+
+            <!-- Table header -->
+            <div style="display:grid;grid-template-columns:1fr 90px 110px 36px;gap:8px;padding:0 4px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">
+              <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.6px;">Course Name</div>
+              <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.6px;">Credits</div>
+              <div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.6px;">Grade</div>
+              <div></div>
+            </div>
+
+            <!-- Rows container -->
+            <div id="gc-rows" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;"></div>
+
+            <p id="gc-empty" style="text-align:center;color:#475569;font-size:13px;padding:20px 0;">Click <strong style="color:#a78bfa;">+ Add Course</strong> to start calculating</p>
+          </div>
+
           <!-- Subjects table -->
           <div id="grades-table-section">
             <div class="dash-section-hd">
@@ -2315,6 +2356,7 @@
           if (gradesEl) gradesEl.style.display = 'flex';
           if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
           window.__buildGradesView(window.__currentLang || 'en');
+          window.dispatchEvent(new CustomEvent('shell:gradesOpen'));
         } else if (view === 'profile') {
           homeEls.forEach(function (el) { el.style.display = 'none'; });
           if (profileEl) profileEl.style.display = 'flex';
@@ -2928,6 +2970,119 @@
       };
 
       /* ── Build the grades page content ── */
+      /* ── GPA Calculator (out of 5) ── */
+      (function () {
+        var GC_SCALE = [
+          { label: 'A+',  points: 5.00 },
+          { label: 'A',   points: 4.75 },
+          { label: 'B+',  points: 4.50 },
+          { label: 'B',   points: 4.00 },
+          { label: 'C+',  points: 3.50 },
+          { label: 'C',   points: 3.00 },
+          { label: 'D+',  points: 2.50 },
+          { label: 'D',   points: 2.00 },
+          { label: 'F',   points: 0.00 }
+        ];
+        var _rows = [];
+        var _uid  = 0;
+
+        function save() { try { localStorage.setItem('gpaCalcRows', JSON.stringify(_rows)); } catch(e){} }
+        function load() { try { var d = JSON.parse(localStorage.getItem('gpaCalcRows') || '[]'); if (Array.isArray(d)) _rows = d; } catch(e){} }
+
+        function gradeSelectHtml(val) {
+          return '<select onchange="window.__gcRowChange()" style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:7px 8px;color:#e2e8f0;font-size:13px;outline:none;cursor:pointer;">'
+            + GC_SCALE.map(function(g){ return '<option value="'+g.points+'"'+(parseFloat(val)===g.points?' selected':'')+'>'+g.label+' ('+g.points.toFixed(2))+'</option>'; }).join('')
+            + '</select>';
+        }
+
+        function render() {
+          var container = document.getElementById('gc-rows');
+          var empty     = document.getElementById('gc-empty');
+          if (!container) return;
+          if (_rows.length === 0) {
+            container.innerHTML = '';
+            if (empty) empty.style.display = 'block';
+            updateResult();
+            return;
+          }
+          if (empty) empty.style.display = 'none';
+          container.innerHTML = _rows.map(function(row, i) {
+            return '<div data-gcrow="'+i+'" style="display:grid;grid-template-columns:1fr 90px 110px 36px;gap:8px;align-items:center;">'
+              + '<input type="text" value="'+row.name.replace(/"/g,'&quot;')+'" placeholder="Course name..." oninput="window.__gcRowChange()" '
+              + 'style="background:#1e293b;border:1px solid rgba(139,92,246,0.15);border-radius:8px;padding:7px 10px;color:#e2e8f0;font-size:13px;outline:none;width:100%;box-sizing:border-box;font-family:Inter,sans-serif;" />'
+              + '<input type="number" value="'+row.credits+'" min="1" max="6" oninput="window.__gcRowChange()" '
+              + 'style="background:#1e293b;border:1px solid rgba(139,92,246,0.15);border-radius:8px;padding:7px 8px;color:#e2e8f0;font-size:13px;outline:none;width:100%;box-sizing:border-box;text-align:center;" />'
+              + gradeSelectHtml(row.points)
+              + '<button onclick="window.__gcDeleteRow('+i+')" style="width:30px;height:30px;border-radius:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;padding:0;" onmouseenter="this.style.background=\'rgba(239,68,68,0.2)\'" onmouseleave="this.style.background=\'rgba(239,68,68,0.1)\'">✕</button>'
+              + '</div>';
+          }).join('');
+          updateResult();
+        }
+
+        function readRowsFromDOM() {
+          var container = document.getElementById('gc-rows');
+          if (!container) return;
+          var cells = container.querySelectorAll('[data-gcrow]');
+          cells.forEach(function(cell, i) {
+            var inputs = cell.querySelectorAll('input, select');
+            if (_rows[i]) {
+              _rows[i].name    = inputs[0] ? inputs[0].value : _rows[i].name;
+              _rows[i].credits = inputs[1] ? (parseFloat(inputs[1].value) || 1) : _rows[i].credits;
+              _rows[i].points  = inputs[2] ? (parseFloat(inputs[2].value) || 0) : _rows[i].points;
+            }
+          });
+        }
+
+        function updateResult() {
+          var banner   = document.getElementById('gc-result-banner');
+          var gpaEl    = document.getElementById('gc-gpa-val');
+          var credEl   = document.getElementById('gc-credits-val');
+          var gradeEl  = document.getElementById('gc-grade-val');
+          var statusEl = document.getElementById('gc-status-val');
+          if (!banner) return;
+          if (_rows.length === 0) { banner.style.display = 'none'; return; }
+          banner.style.display = 'flex';
+          var totalPoints = 0, totalCredits = 0;
+          _rows.forEach(function(r){ totalPoints += r.points * r.credits; totalCredits += r.credits; });
+          var gpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+          var letter = gpa >= 4.75 ? 'A+' : gpa >= 4.5 ? 'A' : gpa >= 4.0 ? 'B+' : gpa >= 3.5 ? 'B' : gpa >= 3.0 ? 'C+' : gpa >= 2.5 ? 'C' : gpa >= 2.0 ? 'D+' : gpa >= 1.0 ? 'D' : 'F';
+          var status = gpa >= 3.5 ? 'Excellent' : gpa >= 3.0 ? 'Very Good' : gpa >= 2.5 ? 'Good' : gpa >= 2.0 ? 'Pass' : 'Fail';
+          var statusColor = gpa >= 3.5 ? '#34d399' : gpa >= 2.5 ? '#fbbf24' : gpa >= 2.0 ? '#38bdf8' : '#f87171';
+          if (gpaEl)    gpaEl.textContent    = gpa.toFixed(2);
+          if (credEl)   credEl.textContent   = totalCredits;
+          if (gradeEl)  gradeEl.textContent  = letter;
+          if (statusEl) { statusEl.textContent = status; statusEl.style.color = statusColor; }
+        }
+
+        window.__gcAddRow = function () {
+          _rows.push({ name: '', credits: 3, points: 4.75 });
+          render(); save();
+          /* Focus last name input */
+          setTimeout(function(){
+            var inputs = document.querySelectorAll('#gc-rows input[type="text"]');
+            if (inputs.length) inputs[inputs.length-1].focus();
+          }, 50);
+        };
+        window.__gcDeleteRow  = function (i) { _rows.splice(i, 1); render(); save(); };
+        window.__gcReset      = function () { _rows = []; render(); save(); };
+        window.__gcRowChange  = function () { readRowsFromDOM(); updateResult(); save(); };
+
+        /* Init */
+        load();
+        /* Render when grades view opens */
+        var _origBuild = null;
+        window.addEventListener('shell:gradesOpen', function(){ render(); });
+
+        /* Also hook into __buildGradesView to render calculator */
+        document.addEventListener('DOMContentLoaded', function(){
+          var orig = window.__buildGradesView;
+          if (orig) window.__buildGradesView = function(lang){
+            orig(lang);
+            render();
+          };
+        });
+      })();
+
       window.__buildGradesView = function (lang) {
         lang = lang || 'en';
         var data = GRADE_DATA[lang] || GRADE_DATA.en;
