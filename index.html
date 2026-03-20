@@ -275,7 +275,7 @@
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background:rgba(234,179,8,0.18);">🔥</div>
-            <div class="stat-value">7</div>
+            <div class="stat-value" id="stat-streak-val">0</div>
             <div class="stat-label" data-i18n="statStudyStreak">Study Streak</div>
             <div class="stat-change" data-i18n="statStudyStreakChange">Days in a row</div>
           </div>
@@ -345,7 +345,7 @@
             </div>
 
             <!-- Result banner -->
-            <div id="gc-result-banner" style="display:none;background:linear-gradient(135deg,rgba(139,92,246,0.18),rgba(219,39,119,0.12));border:1px solid rgba(139,92,246,0.3);border-radius:14px;padding:16px 20px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <div id="gc-result-banner" style="display:none;background:linear-gradient(135deg,rgba(139,92,246,0.18),rgba(219,39,119,0.12));border:1px solid rgba(139,92,246,0.3);border-radius:14px;padding:16px 20px;margin-bottom:18px;align-items:center;gap:16px;flex-wrap:wrap;">
               <div style="text-align:center;min-width:80px;">
                 <div id="gc-gpa-val" style="font-size:36px;font-weight:900;color:#a78bfa;line-height:1;">0.00</div>
                 <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-top:2px;">GPA / 5.0</div>
@@ -2793,6 +2793,8 @@
           var count = updateStreak();
           var el = document.getElementById('streak-count');
           if (el) el.textContent = count;
+          var statEl = document.getElementById('stat-streak-val');
+          if (statEl) statEl.textContent = count;
 
           /* Weekly grid — last 7 days */
           var grid = document.getElementById('streak-grid');
@@ -2963,7 +2965,7 @@
               '<div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Active Goals</div>' +
             '</div>' +
             '<div class="gcard" style="text-align:center;padding:20px;">' +
-              '<div style="font-size:28px;font-weight:900;color:#f59e0b;">7</div>' +
+              '<div style="font-size:28px;font-weight:900;color:#f59e0b;">' + (parseInt(localStorage.getItem('streak_count')||'0',10)) + '</div>' +
               '<div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Day Streak</div>' +
             '</div>';
         }
@@ -2991,7 +2993,7 @@
 
         function gradeSelectHtml(val) {
           return '<select onchange="window.__gcRowChange()" style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:7px 8px;color:#e2e8f0;font-size:13px;outline:none;cursor:pointer;">'
-            + GC_SCALE.map(function(g){ return '<option value="'+g.points+'"'+(parseFloat(val)===g.points?' selected':'')+'>'+g.label+' ('+g.points.toFixed(2))+'</option>'; }).join('')
+            + GC_SCALE.map(function(g){ return '<option value="'+g.points+'"'+(parseFloat(val)===g.points?' selected':'')+'>'+g.label+' ('+g.points.toFixed(2)+')</option>'; }).join('')
             + '</select>';
         }
 
