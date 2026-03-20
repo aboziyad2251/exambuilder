@@ -4,7 +4,12 @@
       "Bash(find c:UsersmohamDesktopExam-builder -type f \\\\\\(-name *.json -o -name *.tsx -o -name *.jsx -o -name *.ts -o -name *.js \\\\\\) ! -path */.git/* ! -path */node_modules/*)",
       "Read(//c/Users/moham/Desktop/Exam-builder/**)",
       "Bash(grep -ao \"\"[A-Za-z]*\"\": c:UsersmohamDesktopExam-builderexambuilderassetsindex-DyN3VeGQ.js)",
-      "Bash(npx serve:*)"
+      "Bash(npx serve:*)",
+      "Bash(node -e \":*)",
+      "Bash(scp index.html root@76.13.40.119:/var/www/frontend/exambuilder/)",
+      "Bash(scp assets/index-DyN3VeGQ.js root@76.13.40.119:/var/www/frontend/exambuilder/assets/)",
+      "Bash(scp assets/index-DJSVmgVU.css root@76.13.40.119:/var/www/frontend/exambuilder/assets/)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/aboziyad2251/exambuilder/main/index.html\")"
     ]
   }
 }
