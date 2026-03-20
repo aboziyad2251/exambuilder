@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find c:UsersmohamDesktopExam-builder -type f \\\\\\(-name *.json -o -name *.tsx -o -name *.jsx -o -name *.ts -o -name *.js \\\\\\) ! -path */.git/* ! -path */node_modules/*)",
+      "Read(//c/Users/moham/Desktop/Exam-builder/**)",
+      "Bash(grep -ao \"\"[A-Za-z]*\"\": c:UsersmohamDesktopExam-builderexambuilderassetsindex-DyN3VeGQ.js)"
+    ]
+  }
+}

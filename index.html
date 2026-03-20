@@ -12,28 +12,31 @@
       theme: {
         extend: {
           colors: {
-            slate: {
-              850: '#151F32',
-              950: '#020617',
-            }
+            slate: { 850: '#151F32', 950: '#020617' }
           }
         }
       }
     }
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
+    body { font-family: 'Inter', sans-serif; }
   </style>
   <script>
-    // Initialize theme
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
+    /* ── Theme Init: Scholar (dark) | Lumen (light) | Azure (blue) ── */
+    (function () {
+      var stored = localStorage.getItem('colorTheme');
+      if (!stored) stored = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', stored);
+      if (stored === 'dark') {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      window.__currentTheme = stored;
+    })();
   </script>
 
   <script type="importmap">
@@ -48,220 +51,827 @@
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
   }
 }
-</script>
+  </script>
   <script type="module" crossorigin src="/assets/index-DyN3VeGQ.js?v=2"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DJSVmgVU.css?v=2">
+  <link rel="stylesheet" crossorigin href="/assets/index-DJSVmgVU.css?v=10">
 </head>
 
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
-  <!-- Interactive Aurora Background Canvas -->
-  <canvas id="aurora"
-    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; opacity: 0.6;"></canvas>
 
-  <!-- Lecture Analyzer Nav Link -->
-  <a id="nav-lecture-link" href="lecture.html" style="
-      position:fixed;top:18px;right:20px;z-index:9999;
-      background:linear-gradient(135deg,#8b5cf6,#d946ef);
-      color:#fff;font-family:Inter,sans-serif;font-size:13px;font-weight:600;
-      padding:8px 18px;border-radius:999px;text-decoration:none;
-      box-shadow:0 4px 20px rgba(139,92,246,0.4);
-      transition:all 0.2s ease;letter-spacing:0.3px;
-    " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(139,92,246,0.6)'"
-    onmouseout="this.style.transform='';this.style.boxShadow='0 4px 20px rgba(139,92,246,0.4)'">
-    📚 Lecture Analyzer
-  </a>
+  <!-- Aurora Background Canvas -->
+  <canvas id="aurora" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;opacity:0.6;"></canvas>
 
-  <div id="root"></div>
+  <!-- Hidden lecture link — kept for localization script compatibility -->
+  <a id="nav-lecture-link" href="lecture.html" style="display:none;" aria-hidden="true">📚 Lecture/Lesson analyzer</a>
 
-  <!-- Aurora Canvas Animation Script -->
+  <!-- ═══════════════════════ PHASE 7: MOBILE HAMBURGER ═══════════════════════ -->
+  <button id="menu-toggle"
+    aria-label="Toggle navigation menu"
+    aria-expanded="false"
+    aria-controls="app-sidebar"
+    onclick="window.__toggleSidebar()">
+    <span class="hb-bar"></span>
+    <span class="hb-bar"></span>
+    <span class="hb-bar"></span>
+  </button>
+  <div id="sidebar-overlay" onclick="window.__closeSidebar()" aria-hidden="true"></div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       APP SHELL — Three-Column Layout
+       ═══════════════════════════════════════════════════════ -->
+  <div id="app-shell">
+
+    <!-- ═══ LEFT SIDEBAR ═══ -->
+    <aside id="app-sidebar">
+
+      <!-- Logo -->
+      <div id="sidebar-logo">
+        <div id="sidebar-logo-icon">◆</div>
+        <span id="sidebar-logo-text">Techarja</span>
+      </div>
+
+      <!-- Navigation -->
+      <nav id="sidebar-nav" role="navigation" aria-label="Main navigation">
+
+        <a class="s-nav-item s-active" data-view="dashboard" href="#" aria-current="page" aria-label="Dashboard" onclick="return window.__shellNav(this)">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          <span class="s-nav-label" data-i18n="navDashboard">Dashboard</span>
+        </a>
+
+        <a class="s-nav-item" data-view="courses" href="#" aria-label="Courses" onclick="return window.__shellNav(this)">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <span class="s-nav-label" data-i18n="navCourses">Courses</span>
+        </a>
+
+        <a class="s-nav-item" data-view="exams" href="#" aria-label="My Exams" onclick="return window.__shellNav(this)">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <polyline points="9,15 11,17 15,13"/>
+          </svg>
+          <span class="s-nav-label" data-i18n="navMyExams">My Exams</span>
+        </a>
+
+        <a class="s-nav-item" data-view="grades" href="#" aria-label="Grades" onclick="return window.__shellNav(this)">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+          <span class="s-nav-label" data-i18n="navGrades">Grades</span>
+        </a>
+
+        <a class="s-nav-item" data-view="schedule" href="#" aria-label="Schedule" onclick="return window.__shellNav(this)">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8"  y1="2" x2="8"  y2="6"/>
+            <line x1="3"  y1="10" x2="21" y2="10"/>
+          </svg>
+          <span class="s-nav-label" data-i18n="navSchedule">Schedule</span>
+        </a>
+
+        <a class="s-nav-item" href="lecture.html">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+          </svg>
+          <span class="s-nav-label" data-i18n="navLectureAnalyzer">Lecture Analyzer</span>
+        </a>
+
+        <a class="s-nav-item" data-view="settings" href="#" aria-label="Settings" onclick="return window.__shellNav(this)">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span class="s-nav-label" data-i18n="navSettings">Settings</span>
+        </a>
+
+      </nav><!-- end #sidebar-nav -->
+
+      <div style="flex:1;min-height:12px;"></div>
+
+      <!-- 3-Way Theme Toggle — embedded in sidebar -->
+      <div id="theme-switcher" style="padding:0 2px;margin-bottom:14px;">
+        <div id="theme-tooltip" style="font-family:Inter,sans-serif;font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,0.55);color:#fff;opacity:0;transition:opacity 0.2s ease;pointer-events:none;white-space:nowrap;margin-bottom:6px;display:inline-block;">
+          Switch theme
+        </div>
+        <button id="theme-cycle-btn"
+          aria-label="Switch color theme"
+          onclick="window.__cycleTheme()"
+          onmouseenter="document.getElementById('theme-tooltip').style.opacity='1'"
+          onmouseleave="document.getElementById('theme-tooltip').style.opacity='0'"
+          style="width:100%;display:flex;align-items:center;gap:9px;padding:11px 13px;border:none;border-radius:13px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 4px 16px rgba(0,0,0,0.20);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);">
+          <span id="theme-btn-icon" style="font-size:15px;line-height:1;">🌙</span>
+          <span id="theme-btn-dots" style="display:flex;gap:5px;align-items:center;">
+            <span class="tdot" data-t="dark"  style="width:7px;height:7px;border-radius:50%;background:#8b5cf6;opacity:1;  transition:opacity .3s,transform .3s;transform:scale(1.3);"></span>
+            <span class="tdot" data-t="light" style="width:7px;height:7px;border-radius:50%;background:#c026d3;opacity:0.35;transition:opacity .3s,transform .3s;transform:scale(1.0);"></span>
+            <span class="tdot" data-t="azure" style="width:7px;height:7px;border-radius:50%;background:#2563eb;opacity:0.35;transition:opacity .3s,transform .3s;transform:scale(1.0);"></span>
+          </span>
+          <span id="theme-btn-label">Scholar</span>
+        </button>
+      </div>
+
+      <!-- Language Toggle -->
+      <div id="lang-switcher">
+        <button id="lang-toggle-btn"
+          aria-label="Switch to Arabic / العربية"
+          onclick="window.__toggleLang()">
+          <span id="lang-toggle-flag">🌐</span>
+          <span id="lang-toggle-label">AR</span>
+          <span id="lang-toggle-badge">عربي</span>
+        </button>
+      </div>
+
+      <!-- Premium Subscription CTA -->
+      <div id="sidebar-premium">
+        <!-- Geometric student character illustration -->
+        <svg id="sidebar-premium-illustration" width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M27 23 Q40 10 53 23 Q53 14 40 11 Q27 14 27 23Z" fill="rgba(255,255,255,0.60)"/>
+          <circle cx="40" cy="27" r="13" fill="rgba(255,255,255,0.42)"/>
+          <circle cx="35.5" cy="25.5" r="2" fill="rgba(55,25,95,0.65)"/>
+          <circle cx="44.5" cy="25.5" r="2" fill="rgba(55,25,95,0.65)"/>
+          <path d="M36.5 32 Q40 36 43.5 32" stroke="rgba(55,25,95,0.60)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <rect x="25" y="43" width="30" height="17" rx="7" fill="rgba(255,255,255,0.30)"/>
+          <rect x="13" y="44" width="12" height="13" rx="5" fill="rgba(255,255,255,0.20)"/>
+          <rect x="55" y="44" width="12" height="13" rx="5" fill="rgba(255,255,255,0.20)"/>
+          <rect x="20" y="62" width="40" height="5" rx="2.5" fill="rgba(255,255,255,0.52)"/>
+          <rect x="24" y="52" width="32" height="10" rx="2" fill="rgba(255,255,255,0.32)"/>
+          <rect x="27" y="54" width="26" height="6" rx="1.5" fill="rgba(100,80,220,0.22)"/>
+        </svg>
+        <p id="sidebar-premium-title" data-i18n="premiumTitle">Premium subscription</p>
+        <p id="sidebar-premium-desc" data-i18n="premiumDesc">Buy Premium and get access to new courses</p>
+        <button id="sidebar-premium-btn" data-i18n="premiumBtn">More detailed</button>
+      </div>
+
+    </aside><!-- end #app-sidebar -->
+
+    <!-- ═══ MAIN CONTENT — React App renders here ═══ -->
+    <main id="app-main">
+
+      <!-- ─── DASHBOARD OVERLAY (shown when Dashboard nav is active) ─── -->
+      <div id="dash-overlay" class="dash-visible">
+
+        <!-- Greeting Header -->
+        <div id="dash-header">
+          <h1 id="dash-greeting">Good morning, Scholar 👋</h1>
+          <p id="dash-subtitle" data-i18n="dashSubtitle">Ready to build today's exam?</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div id="dash-stats">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(139,92,246,0.20);">📝</div>
+            <div class="stat-value" id="stat-total-exams">0</div>
+            <div class="stat-label" data-i18n="statTotalExams">Total Exams</div>
+            <div class="stat-change" data-i18n="statTotalExamsChange">+3 this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(34,197,94,0.18);">🎯</div>
+            <div class="stat-value">82%</div>
+            <div class="stat-label" data-i18n="statAvgScore">Avg Score</div>
+            <div class="stat-change" data-i18n="statAvgScoreChange">+5% vs last month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(14,165,233,0.18);">⚡</div>
+            <div class="stat-value" id="stat-questions">0</div>
+            <div class="stat-label" data-i18n="statQuestionsGen">Questions Generated</div>
+            <div class="stat-change" data-i18n="statQuestionsGenChange">+24 today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(234,179,8,0.18);">🔥</div>
+            <div class="stat-value">7</div>
+            <div class="stat-label" data-i18n="statStudyStreak">Study Streak</div>
+            <div class="stat-change" data-i18n="statStudyStreakChange">Days in a row</div>
+          </div>
+        </div>
+
+        <!-- Score History Chart (Analysis) -->
+        <div id="dash-perf-section">
+          <div class="dash-section-hd">
+            <h2 class="dash-section-title" data-i18n="sectionScoreHistory">Score History</h2>
+            <span class="dash-see-all" data-i18n="sectionScoreHistoryMeta" style="cursor:default;pointer-events:none;">Last 8 exams</span>
+          </div>
+          <div id="perf-chart-container"></div>
+        </div>
+
+        <!-- Recent Exams Cards -->
+        <div id="dash-courses-section">
+          <div class="dash-section-hd">
+            <h2 class="dash-section-title" data-i18n="sectionRecentExams">Recent Exams</h2>
+            <button class="dash-see-all" data-i18n="seeAll" onclick="window.__shellNav(null,'exams')">See all →</button>
+          </div>
+          <div id="dash-courses-row"><!-- built by JS --></div>
+        </div>
+
+        <!-- My Exams Table -->
+        <div id="dash-exams-section">
+          <div class="dash-section-hd">
+            <h2 class="dash-section-title" data-i18n="sectionMyExams">My Exams</h2>
+            <button class="dash-see-all" data-i18n="viewAll" onclick="window.__shellNav(null,'exams')">View all →</button>
+          </div>
+          <div id="dash-exams-table"><!-- built by JS --></div>
+        </div>
+
+      </div><!-- end #dash-overlay -->
+
+      <div id="root"></div>
+    </main>
+
+    <!-- ═══ RIGHT PANEL ═══ -->
+    <aside id="app-right-panel">
+
+      <!-- Header row -->
+      <div id="right-panel-header">
+        <h3 id="right-panel-title" data-i18n="rightPanelTitle">Profile</h3>
+        <button id="right-edit-btn" title="Edit profile" onclick="window.__shellNav(null,'settings')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Profile Card -->
+      <div id="right-profile-card">
+        <div id="right-avatar-ring">S</div>
+        <h3 id="right-profile-name">Scholar</h3>
+        <span id="right-profile-level">Elementary</span>
+      </div>
+
+      <!-- Mini Calendar -->
+      <div id="right-calendar-card">
+        <div id="cal-header">
+          <h4 id="cal-month-year">—</h4>
+          <div style="display:flex;gap:4px;">
+            <button class="cal-nav-btn" aria-label="Previous month" onclick="window.__calPrev()">&#8249;</button>
+            <button class="cal-nav-btn" aria-label="Next month"     onclick="window.__calNext()">&#8250;</button>
+          </div>
+        </div>
+        <div id="cal-days-header">
+          <div class="cal-day-label" data-day="0">Su</div><div class="cal-day-label" data-day="1">Mo</div>
+          <div class="cal-day-label" data-day="2">Tu</div><div class="cal-day-label" data-day="3">We</div>
+          <div class="cal-day-label" data-day="4">Th</div><div class="cal-day-label" data-day="5">Fr</div>
+          <div class="cal-day-label" data-day="6">Sa</div>
+        </div>
+        <div id="cal-grid"></div>
+      </div>
+
+      <!-- Exam Progress -->
+      <div id="right-progress-card">
+        <h4 id="right-progress-title" data-i18n="rightProgressTitle">Exam Progress</h4>
+        <div id="progress-list"></div>
+      </div>
+
+    </aside><!-- end #app-right-panel -->
+
+  </div><!-- end #app-shell -->
+
+  <!-- Hidden exam-modes-guide — DOM elements kept for localization script -->
+  <div id="exam-modes-guide" style="display:none!important;" aria-hidden="true">
+    <h3 id="mode-guide-title">Exam Modes</h3>
+    <div><strong id="mode-easy">1- Easy mode:</strong> <span id="mode-easy-desc">Simple, direct questions</span></div>
+    <div><strong id="mode-medium">2- Medium Mode:</strong> <span id="mode-medium-desc">Requires complete understanding</span></div>
+    <div><strong id="mode-hard">3- Hard Mode:</strong> <span id="mode-hard-desc">Complex scenarios and deep analysis</span></div>
+    <div><strong id="mode-trickey">4- Trickey:</strong> <span id="mode-trickey-desc">Manipulated questions</span></div>
+    <div><strong id="mode-tricky-mode">5- Tricky Mode:</strong> <span id="mode-tricky-mode-desc">Combination of every mode</span></div>
+  </div>
+
+  <!-- ═══════════════════════ THEME CYCLE SCRIPT ═══════════════════════ -->
   <script>
     (function () {
-      const canvas = document.getElementById('aurora');
-      const ctx = canvas.getContext('2d');
-      let mouseX = window.innerWidth / 2;
-      let mouseY = window.innerHeight / 2;
-      let targetX = mouseX;
-      let targetY = mouseY;
+      var THEMES = [
+        { key: 'dark',  label: 'Scholar', icon: '🌙', isDark: true,  btnBg: 'rgba(30,20,60,0.75)',   btnColor: '#e9d5ff', btnBorder: 'rgba(139,92,246,0.35)' },
+        { key: 'light', label: 'Lumen',   icon: '☀️', isDark: false, btnBg: 'rgba(255,255,255,0.82)', btnColor: '#4c1d95', btnBorder: 'rgba(124,58,237,0.30)' },
+        { key: 'azure', label: 'Azure',   icon: '💙', isDark: false, btnBg: 'rgba(255,255,255,0.82)', btnColor: '#1e3a8a', btnBorder: 'rgba(37,99,235,0.30)'  }
+      ];
+      var DOT_COLORS = { dark: '#8b5cf6', light: '#c026d3', azure: '#2563eb' };
 
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+      function applyTheme(key) {
+        var t = THEMES.find(function (x) { return x.key === key; }) || THEMES[0];
+        document.documentElement.setAttribute('data-theme', key);
+        if (t.isDark) { document.documentElement.classList.add('dark');    localStorage.setItem('theme', 'dark');  }
+        else          { document.documentElement.classList.remove('dark'); localStorage.setItem('theme', 'light'); }
+        localStorage.setItem('colorTheme', key);
+        window.__currentTheme = key;
 
-      window.addEventListener('resize', resize);
-      resize();
+        var aurora = document.getElementById('aurora');
+        if (aurora) aurora.style.opacity = t.isDark ? '0.6' : '0.45';
 
-      // Track mouse movement with smooth following
-      window.addEventListener('mousemove', (e) => {
-        targetX = e.clientX;
-        targetY = e.clientY;
-      });
+        var btn   = document.getElementById('theme-cycle-btn');
+        var icon  = document.getElementById('theme-btn-icon');
+        var label = document.getElementById('theme-btn-label');
+        if (btn)   { btn.style.background = t.btnBg; btn.style.color = t.btnColor; btn.style.border = '1px solid ' + t.btnBorder; }
+        if (icon)  icon.textContent  = t.icon;
+        if (label) label.textContent = t.label;
 
-      // Particle system for aurora effect
-      const particles = [];
-      const particleCount = 50;
-
-      class Particle {
-        constructor() {
-          this.reset();
-        }
-
-        reset() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.vx = (Math.random() - 0.5) * 0.5;
-          this.vy = (Math.random() - 0.5) * 0.5;
-          this.radius = Math.random() * 2 + 1;
-          this.opacity = Math.random() * 0.5 + 0.2;
-        }
-
-        update() {
-          this.x += this.vx;
-          this.y += this.vy;
-
-          // Attract to mouse position
-          const dx = mouseX - this.x;
-          const dy = mouseY - this.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance < 200) {
-            this.vx += dx * 0.00001;
-            this.vy += dy * 0.00001;
-          }
-
-          if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-            this.reset();
-          }
-        }
-
-        draw() {
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(139, 92, 246, ${this.opacity})`;
-          ctx.fill();
-        }
-      }
-
-      // Initialize particles
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
-      }
-
-      function drawGradients() {
-        // Smooth mouse following
-        mouseX += (targetX - mouseX) * 0.05;
-        mouseY += (targetY - mouseY) * 0.05;
-
-        // Clear canvas
-        ctx.fillStyle = 'rgba(2, 6, 23, 0.1)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Create animated gradient orbs
-        const time = Date.now() * 0.001;
-
-        // Violet orb following mouse
-        const gradient1 = ctx.createRadialGradient(
-          mouseX, mouseY, 0,
-          mouseX, mouseY, 400
-        );
-        gradient1.addColorStop(0, 'rgba(139, 92, 246, 0.4)');
-        gradient1.addColorStop(0.5, 'rgba(139, 92, 246, 0.2)');
-        gradient1.addColorStop(1, 'rgba(139, 92, 246, 0)');
-        ctx.fillStyle = gradient1;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Fuchsia orb - animated
-        const x2 = canvas.width * 0.7 + Math.sin(time * 0.5) * 100;
-        const y2 = canvas.height * 0.3 + Math.cos(time * 0.3) * 100;
-        const gradient2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, 350);
-        gradient2.addColorStop(0, 'rgba(217, 70, 239, 0.3)');
-        gradient2.addColorStop(0.5, 'rgba(217, 70, 239, 0.15)');
-        gradient2.addColorStop(1, 'rgba(217, 70, 239, 0)');
-        ctx.fillStyle = gradient2;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Pink orb - animated
-        const x3 = canvas.width * 0.3 + Math.cos(time * 0.4) * 80;
-        const y3 = canvas.height * 0.7 + Math.sin(time * 0.6) * 80;
-        const gradient3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, 300);
-        gradient3.addColorStop(0, 'rgba(236, 72, 153, 0.25)');
-        gradient3.addColorStop(0.5, 'rgba(236, 72, 153, 0.12)');
-        gradient3.addColorStop(1, 'rgba(236, 72, 153, 0)');
-        ctx.fillStyle = gradient3;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Update and draw particles
-        particles.forEach(particle => {
-          particle.update();
-          particle.draw();
+        document.querySelectorAll('.tdot').forEach(function (d) {
+          var active = d.getAttribute('data-t') === key;
+          d.style.opacity    = active ? '1' : '0.30';
+          d.style.transform  = active ? 'scale(1.35)' : 'scale(1.0)';
+          d.style.background = DOT_COLORS[d.getAttribute('data-t')];
         });
       }
 
-      function animate() {
-        drawGradients();
-        requestAnimationFrame(animate);
+      function cycleTheme() {
+        var cur = localStorage.getItem('colorTheme') || 'dark';
+        var idx = THEMES.findIndex(function (x) { return x.key === cur; });
+        applyTheme(THEMES[(idx + 1) % THEMES.length].key);
       }
 
-      animate();
+      window.__cycleTheme = cycleTheme;
+      applyTheme(localStorage.getItem('colorTheme') || window.__currentTheme || 'dark');
+
+      window.addEventListener('storage', function (e) {
+        if (e.key === 'theme' && e.newValue) {
+          var cur = localStorage.getItem('colorTheme') || 'dark';
+          if (e.newValue === 'dark'  && cur !== 'dark')  applyTheme('dark');
+          if (e.newValue === 'light' && cur === 'dark')  applyTheme('light');
+        }
+      });
     })();
   </script>
-  <!-- Exam Modes Guide (Vanilla JS Injected UI) -->
-  <div id="exam-modes-guide"
-    class="hidden md:flex flex-col gap-3 fixed left-4 top-1/4 z-50 p-5 rounded-2xl w-64 text-sm" style="
-      background: rgba(15, 23, 42, 0.4);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    ">
-    <h3 id="mode-guide-title"
-      class="font-bold text-base bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent mb-1 border-b border-white/10 pb-2">
-      Exam Modes</h3>
 
-    <div class="flex flex-col gap-1.5">
-      <div><strong class="text-emerald-400" id="mode-easy">1- Easy mode:</strong> <span
-          class="text-slate-300 leading-tight mb-1" id="mode-easy-desc">Simple, direct questions</span></div>
-      <div><strong class="text-blue-400" id="mode-medium">2- Medium Mode:</strong> <span
-          class="text-slate-300 leading-tight mb-1" id="mode-medium-desc">Requires complete understanding</span></div>
-      <div><strong class="text-orange-400" id="mode-hard">3- Hard Mode:</strong> <span
-          class="text-slate-300 leading-tight mb-1" id="mode-hard-desc">Complex scenarios and deep analysis</span></div>
-      <div><strong class="text-rose-400" id="mode-trickey">4- Trickey:</strong> <span
-          class="text-slate-300 leading-tight mb-1" id="mode-trickey-desc">Manipulated questions</span></div>
-      <div><strong class="text-fuchsia-400" id="mode-tricky-mode">5- Tricky Mode:</strong> <span
-          class="text-slate-300 leading-tight" id="mode-tricky-mode-desc">Combination of every mode</span></div>
-    </div>
-  </div>
+  <!-- ═══════════════════════ AURORA CANVAS ═══════════════════════ -->
+  <script>
+    (function () {
+      var canvas = document.getElementById('aurora');
+      var ctx    = canvas.getContext('2d');
+      var mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+      var targetX = mouseX, targetY = mouseY;
 
-  <!-- Localization Observer Script for custom UI elements -->
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      window.addEventListener('resize', resize); resize();
+      window.addEventListener('mousemove', function (e) { targetX = e.clientX; targetY = e.clientY; });
+
+      var PALETTES = {
+        dark:  { clear: 'rgba(2,6,23,0.10)',      pt: '139,92,246', o1:{r:139,g:92,b:246},a1:[0.40,0.20], o2:{r:217,g:70,b:239},a2:[0.30,0.15], o3:{r:236,g:72,b:153},a3:[0.25,0.12] },
+        light: { clear: 'rgba(238,240,251,0.12)', pt: '124,58,237', o1:{r:124,g:58,b:237},a1:[0.18,0.09], o2:{r:167,g:139,b:250},a2:[0.14,0.07], o3:{r:99,g:102,b:241},a3:[0.12,0.06] },
+        azure: { clear: 'rgba(237,243,251,0.12)', pt: '37,99,235',  o1:{r:37,g:99,b:235}, a1:[0.22,0.11], o2:{r:14,g:165,b:233},a2:[0.18,0.09], o3:{r:6,g:182,b:212}, a3:[0.15,0.07] }
+      };
+      function pal() { return PALETTES[window.__currentTheme] || PALETTES.dark; }
+
+      var pts = [];
+      function Pt() { this.reset(); }
+      Pt.prototype.reset = function () {
+        this.x = Math.random() * canvas.width;  this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.5;  this.vy = (Math.random() - 0.5) * 0.5;
+        this.r = Math.random() * 2 + 1;  this.o = Math.random() * 0.5 + 0.2;
+      };
+      Pt.prototype.update = function () {
+        this.x += this.vx; this.y += this.vy;
+        var dx = mouseX - this.x, dy = mouseY - this.y, d = Math.sqrt(dx*dx+dy*dy);
+        if (d < 300) { this.vx += dx * 0.000012; this.vy += dy * 0.000012; }
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+      };
+      Pt.prototype.draw = function () {
+        var p = pal(); ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(' + p.pt + ',' + this.o + ')'; ctx.fill();
+      };
+      for (var i = 0; i < 50; i++) pts.push(new Pt());
+
+      function orb(ox, oy, r, c, a) {
+        var g = ctx.createRadialGradient(ox,oy,0,ox,oy,r);
+        g.addColorStop(0,   'rgba('+c.r+','+c.g+','+c.b+','+a[0]+')');
+        g.addColorStop(0.5, 'rgba('+c.r+','+c.g+','+c.b+','+a[1]+')');
+        g.addColorStop(1,   'rgba('+c.r+','+c.g+','+c.b+',0)');
+        return g;
+      }
+
+      function draw() {
+        var p = pal(), t = Date.now() * 0.001, br = 1 + Math.sin(t * 0.8) * 0.08;
+        mouseX += (targetX - mouseX) * 0.05; mouseY += (targetY - mouseY) * 0.05;
+        ctx.fillStyle = p.clear; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = orb(mouseX, mouseY, 400*br, p.o1, p.a1); ctx.fillRect(0,0,canvas.width,canvas.height);
+        var x2=canvas.width*0.7+Math.sin(t*0.5)*100, y2=canvas.height*0.3+Math.cos(t*0.3)*100;
+        ctx.fillStyle = orb(x2, y2, 350*(1+Math.sin(t*0.6+1)*0.06), p.o2, p.a2); ctx.fillRect(0,0,canvas.width,canvas.height);
+        var x3=canvas.width*0.3+Math.cos(t*0.4)*80, y3=canvas.height*0.7+Math.sin(t*0.6)*80;
+        ctx.fillStyle = orb(x3, y3, 300*(1+Math.sin(t*0.7+2)*0.06), p.o3, p.a3); ctx.fillRect(0,0,canvas.width,canvas.height);
+        for (var j = 0; j < pts.length; j++) { pts[j].update(); pts[j].draw(); }
+      }
+      (function loop() { draw(); requestAnimationFrame(loop); })();
+    })();
+  </script>
+
+  <!-- ═══════════════════════ SHELL: Nav · Calendar · Progress · Dashboard ═══════════════════════ -->
+  <script>
+    (function () {
+
+      /* ── 1. Sidebar Navigation ── */
+      window.__shellNav = function (el, view) {
+        if (el) {
+          view = el.getAttribute('data-view') || 'dashboard';
+          document.querySelectorAll('.s-nav-item').forEach(function (n) { n.classList.remove('s-active'); });
+          el.classList.add('s-active');
+        }
+        /* Toggle dashboard overlay */
+        var overlay = document.getElementById('dash-overlay');
+        if (overlay) {
+          if ((view || 'dashboard') === 'dashboard') {
+            overlay.classList.add('dash-visible');
+          } else {
+            overlay.classList.remove('dash-visible');
+          }
+        }
+        window.dispatchEvent(new CustomEvent('shell:navigate', { detail: { view: view || 'dashboard' } }));
+        return false;
+      };
+
+      /* ── 2. Mini Calendar ── */
+      var calDate = new Date();
+      var MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+      function renderCalendar() {
+        var y = calDate.getFullYear(), m = calDate.getMonth();
+        var label = document.getElementById('cal-month-year');
+        if (label) label.textContent = MONTHS[m] + ' ' + y;
+
+        var grid = document.getElementById('cal-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        var today = new Date();
+        var todayY = today.getFullYear(), todayM = today.getMonth(), todayD = today.getDate();
+        var firstDay    = new Date(y, m,     1).getDay();
+        var daysInMonth = new Date(y, m + 1, 0).getDate();
+        var daysInPrev  = new Date(y, m,     0).getDate();
+
+        function cell(txt, cls, hasExam) {
+          var d = document.createElement('div');
+          d.className = 'cal-cell' + (cls ? ' ' + cls : '') + (hasExam ? ' cal-has-exam' : '');
+          d.textContent = txt;
+          if (hasExam) {
+            var dot = document.createElement('div');
+            dot.className = 'cal-exam-dot';
+            d.appendChild(dot);
+          }
+          return d;
+        }
+
+        /* Prev month filler */
+        for (var d = firstDay - 1; d >= 0; d--) grid.appendChild(cell(daysInPrev - d, 'cal-other-month', false));
+
+        /* Current month */
+        for (var d = 1; d <= daysInMonth; d++) {
+          var isToday = (d === todayD && m === todayM && y === todayY);
+          var examKey = y + '-' + (m + 1) + '-' + d;
+          var hasExam = !!(window.__examDates && window.__examDates[examKey]);
+          grid.appendChild(cell(d, isToday ? 'cal-today' : '', hasExam));
+        }
+
+        /* Next month filler */
+        var filled = firstDay + daysInMonth;
+        var remain = filled % 7 === 0 ? 0 : 7 - (filled % 7);
+        for (var d = 1; d <= remain; d++) grid.appendChild(cell(d, 'cal-other-month', false));
+      }
+
+      window.__calPrev = function () { calDate.setMonth(calDate.getMonth() - 1); renderCalendar(); };
+      window.__calNext = function () { calDate.setMonth(calDate.getMonth() + 1); renderCalendar(); };
+
+      /* ── 3. SVG Progress Rings ── */
+      function makeRing(pct, strokeStyle) {
+        var R = 15, C = +(2 * Math.PI * R).toFixed(2);
+        var offset = +(C * (1 - pct / 100)).toFixed(2);
+        return (
+          '<svg width="40" height="40" viewBox="0 0 40 40">'
+          + '<circle class="prog-bg-ring" cx="20" cy="20" r="' + R + '" fill="none" stroke-width="3"/>'
+          + '<circle class="progress-ring-fill" cx="20" cy="20" r="' + R + '" fill="none"'
+          + ' stroke-width="3" stroke-linecap="round"'
+          + ' stroke-dasharray="' + C + '" stroke-dashoffset="' + C + '"'
+          + ' data-target="' + offset + '"'
+          + ' style="' + strokeStyle + ';transform:rotate(-90deg);transform-origin:center;"/>'
+          + '</svg>'
+          + '<span class="progress-pct">' + pct + '%</span>'
+        );
+      }
+
+      function buildProgress() {
+        var list = document.getElementById('progress-list');
+        if (!list) return;
+
+        var items = [
+          { pct: 50, label: 'Active Exam',  sub: '12 questions', active: true,  stroke: 'stroke:#fff' },
+          { pct: 65, label: 'Study Goal',   sub: '18 tasks',     active: false, stroke: 'stroke:var(--prism-violet)' },
+          { pct: 25, label: 'Last Lecture', sub: '10 concepts',  active: false, stroke: 'stroke:var(--prism-violet)' }
+        ];
+
+        list.innerHTML = '';
+        items.forEach(function (item) {
+          var div = document.createElement('div');
+          div.className = 'progress-item ' + (item.active ? 'progress-active' : 'progress-inactive');
+          div.innerHTML =
+            '<div class="progress-ring-wrap">' + makeRing(item.pct, item.stroke) + '</div>'
+            + '<div class="progress-info">'
+            +   '<div class="progress-label">'    + item.label + '</div>'
+            +   '<div class="progress-sublabel">' + item.sub   + '</div>'
+            + '</div>'
+            + '<span class="progress-arrow">&#8250;</span>';
+          list.appendChild(div);
+        });
+
+        /* Animate rings on next frame */
+        requestAnimationFrame(function () {
+          document.querySelectorAll('.progress-ring-fill').forEach(function (el) {
+            el.style.transition      = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';
+            el.style.strokeDashoffset = el.getAttribute('data-target');
+          });
+        });
+      }
+
+      /* ── 4. Dashboard Greeting ── */
+      (function () {
+        var h = new Date().getHours();
+        var greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+        var el = document.getElementById('dash-greeting');
+        if (el) el.textContent = greet + ', Scholar 👋';
+      })();
+
+      /* ── 5. Course Cards ── */
+      (function () {
+        var row = document.getElementById('dash-courses-row');
+        if (!row) return;
+        var cards = [
+          { emoji: '🔬', subject: 'Science',      name: 'Biology Final Exam',   lessons: '24 questions', gradient: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', color: '#0ea5e9', avatars: ['A','B','C'] },
+          { emoji: '➗', subject: 'Mathematics',  name: 'Calculus Mid-Term',    lessons: '30 questions', gradient: 'linear-gradient(135deg,#8b5cf6,#d946ef)', color: '#8b5cf6', avatars: ['D','E']     },
+          { emoji: '⚗️', subject: 'Chemistry',    name: 'Organic Chemistry',    lessons: '18 questions', gradient: 'linear-gradient(135deg,#f59e0b,#ef4444)', color: '#f59e0b', avatars: ['F','G','H'] },
+          { emoji: '📜', subject: 'History',      name: 'World History Quiz',   lessons: '15 questions', gradient: 'linear-gradient(135deg,#22c55e,#10b981)', color: '#22c55e', avatars: ['I','J']     }
+        ];
+        row.innerHTML = '';
+        cards.forEach(function (c) {
+          var avHtml = c.avatars.map(function (l) {
+            return '<div class="course-avatar" style="background:' + c.color + ';">' + l + '</div>';
+          }).join('');
+          var div = document.createElement('div');
+          div.className = 'course-card';
+          div.innerHTML =
+            '<div class="course-thumb" style="background:' + c.gradient + ';">' + c.emoji + '</div>'
+            + '<div class="course-body">'
+            +   '<div class="course-subject" style="color:' + c.color + ';">' + c.subject + '</div>'
+            +   '<div class="course-name">' + c.name + '</div>'
+            +   '<div class="course-meta">'
+            +     '<span class="course-lessons">' + c.lessons + '</span>'
+            +     '<div class="course-avatars">' + avHtml + '</div>'
+            +   '</div>'
+            + '</div>';
+          row.appendChild(div);
+        });
+      })();
+
+      /* ── 6. My Exams Table ── */
+      (function () {
+        var table = document.getElementById('dash-exams-table');
+        if (!table) return;
+        var rows = [
+          { icon: '🔬', iconBg: 'rgba(14,165,233,0.20)',  title: 'Biology Final',     qs: '24 questions', date: 'Mar 15, 2026', stars: 5, level: 'Hard'   },
+          { icon: '➗', iconBg: 'rgba(139,92,246,0.20)',  title: 'Calculus Mid-Term', qs: '30 questions', date: 'Mar 10, 2026', stars: 4, level: 'Hard'   },
+          { icon: '📜', iconBg: 'rgba(34,197,94,0.20)',   title: 'World History Quiz',qs: '15 questions', date: 'Mar 5, 2026',  stars: 3, level: 'Medium' },
+          { icon: '⚗️', iconBg: 'rgba(245,158,11,0.20)', title: 'Organic Chemistry', qs: '18 questions', date: 'Feb 28, 2026', stars: 4, level: 'Easy'   }
+        ];
+        var html = '<div class="exams-table-row exams-thead"><div>Exam</div><div>Date</div><div>Score</div><div>Level</div></div>';
+        rows.forEach(function (r) {
+          var stars = '';
+          for (var i = 1; i <= 5; i++) stars += (i <= r.stars ? '★' : '☆');
+          var starColor = r.stars >= 4 ? '#f59e0b' : '#94a3b8';
+          var lvlClass  = r.level === 'Easy' ? 'level-easy' : r.level === 'Medium' ? 'level-medium' : 'level-hard';
+          html +=
+            '<div class="exams-table-row">'
+            + '<div class="exam-name-cell">'
+            +   '<div class="exam-icon" style="background:' + r.iconBg + ';">' + r.icon + '</div>'
+            +   '<div><div class="exam-title">' + r.title + '</div><div class="exam-qs">' + r.qs + '</div></div>'
+            + '</div>'
+            + '<div class="exam-date">' + r.date + '</div>'
+            + '<div class="exam-stars" style="color:' + starColor + ';">' + stars + '</div>'
+            + '<div><span class="exam-level ' + lvlClass + '">' + r.level + '</span></div>'
+            + '</div>';
+        });
+        table.innerHTML = html;
+      })();
+
+      /* ── 7. Count-up animation for stat numbers ── */
+      (function () {
+        var targets = [
+          { id: 'stat-total-exams', target: 24 },
+          { id: 'stat-questions',   target: 347 }
+        ];
+        targets.forEach(function (item) {
+          var el = document.getElementById(item.id);
+          if (!el) return;
+          var duration = 1200, startTime = null;
+          function step(ts) {
+            if (!startTime) startTime = ts;
+            var progress = Math.min((ts - startTime) / duration, 1);
+            var ease = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(item.target * ease);
+            if (progress < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        });
+      })();
+
+      /* ── 8. Exam Dates for Calendar Dots ── */
+      window.__examDates = {
+        '2026-3-5': true, '2026-3-10': true,
+        '2026-3-15': true, '2026-2-28': true
+      };
+      /* Also try to parse exam dates from localStorage (React app storage) */
+      (function () {
+        var EXAM_KEYS = ['exams', 'userExams', 'generatedExams', 'savedExams'];
+        EXAM_KEYS.forEach(function (key) {
+          try {
+            var raw = localStorage.getItem(key);
+            if (!raw) return;
+            var arr = JSON.parse(raw);
+            if (!Array.isArray(arr)) return;
+            arr.forEach(function (exam) {
+              var dateStr = exam.date || exam.createdAt || exam.updatedAt || '';
+              if (!dateStr) return;
+              var d = new Date(dateStr);
+              if (isNaN(d)) return;
+              var k = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+              window.__examDates[k] = true;
+            });
+          } catch (e) {}
+        });
+      })();
+
+      /* ── 9. Profile Card — live from localStorage ── */
+      (function () {
+        var STR_KEYS  = ['userName', 'user_name', 'displayName', 'name', 'fullName'];
+        var JSON_KEYS = ['user', 'userProfile', 'profile', 'authUser', 'currentUser'];
+        var LEVEL_KEYS= ['userLevel', 'level', 'grade'];
+
+        function readProfile() {
+          var name = null, level = null;
+
+          /* Try flat string keys */
+          for (var i = 0; i < STR_KEYS.length; i++) {
+            var v = localStorage.getItem(STR_KEYS[i]);
+            if (v && v.trim()) { name = v.trim(); break; }
+          }
+          /* Try JSON object keys */
+          if (!name) {
+            for (var j = 0; j < JSON_KEYS.length; j++) {
+              try {
+                var raw = localStorage.getItem(JSON_KEYS[j]);
+                if (!raw) continue;
+                var obj = JSON.parse(raw);
+                name  = obj.name || obj.displayName || obj.userName || obj.email || null;
+                level = obj.level || obj.grade || null;
+                if (name) break;
+              } catch (e) {}
+            }
+          }
+          /* Try level keys */
+          if (!level) {
+            for (var k = 0; k < LEVEL_KEYS.length; k++) {
+              var lv = localStorage.getItem(LEVEL_KEYS[k]);
+              if (lv) { level = lv; break; }
+            }
+          }
+          return { name: name, level: level };
+        }
+
+        function applyProfile(data) {
+          if (!data.name) return;
+          var avatar  = document.getElementById('right-avatar-ring');
+          var nameEl  = document.getElementById('right-profile-name');
+          var levelEl = document.getElementById('right-profile-level');
+          var greetEl = document.getElementById('dash-greeting');
+
+          var initial   = data.name.charAt(0).toUpperCase();
+          var firstName = data.name.split(' ')[0];
+
+          if (avatar && avatar.textContent !== initial) {
+            avatar.textContent = initial;
+            avatar.classList.remove('profile-just-updated');
+            void avatar.offsetWidth; /* reflow to retrigger animation */
+            avatar.classList.add('profile-just-updated');
+          }
+          if (nameEl)  nameEl.textContent  = data.name;
+          if (levelEl && data.level) levelEl.textContent = data.level;
+
+          if (greetEl) {
+            var h = new Date().getHours();
+            var g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+            greetEl.textContent = g + ', ' + firstName + ' \uD83D\uDC4B';
+          }
+        }
+
+        /* Initial read */
+        applyProfile(readProfile());
+
+        /* Watch for changes from React app (cross-tab or post-login) */
+        window.addEventListener('storage', function (e) {
+          if (STR_KEYS.indexOf(e.key) > -1 || JSON_KEYS.indexOf(e.key) > -1 || LEVEL_KEYS.indexOf(e.key) > -1) {
+            applyProfile(readProfile());
+          }
+        });
+
+        /* Poll same-tab (React sets localStorage without firing storage event) */
+        var _lastProfileSig = '';
+        setInterval(function () {
+          var d = readProfile();
+          var sig = (d.name || '') + '|' + (d.level || '');
+          if (sig !== _lastProfileSig) { _lastProfileSig = sig; applyProfile(d); }
+        }, 2500);
+      })();
+
+      /* ── 10. Progress Rings — try to use real exam counts ── */
+      (function () {
+        var EXAM_KEYS = ['exams', 'userExams', 'generatedExams', 'savedExams'];
+        var realCount = 0, realQuestions = 0;
+
+        EXAM_KEYS.forEach(function (key) {
+          try {
+            var raw = localStorage.getItem(key);
+            if (!raw) return;
+            var arr = JSON.parse(raw);
+            if (!Array.isArray(arr) || !arr.length) return;
+            if (arr.length > realCount) {
+              realCount = arr.length;
+              realQuestions = arr.reduce(function (sum, e) {
+                return sum + (e.questionCount || e.questions || (Array.isArray(e.questions) ? e.questions.length : 0) || 0);
+              }, 0);
+            }
+          } catch (e) {}
+        });
+
+        /* Update stat cards if we found real data */
+        if (realCount > 0) {
+          var teEl = document.getElementById('stat-total-exams');
+          var qEl  = document.getElementById('stat-questions');
+          if (teEl) teEl.textContent = realCount;
+          if (qEl && realQuestions > 0) qEl.textContent = realQuestions;
+
+          /* Update progress ring sublabels */
+          var sublabels = document.querySelectorAll('.progress-sublabel');
+          if (sublabels[0]) sublabels[0].textContent = realCount + ' exam' + (realCount !== 1 ? 's' : '');
+          if (sublabels[1]) sublabels[1].textContent = realQuestions > 0 ? realQuestions + ' questions' : '18 tasks';
+        }
+      })();
+
+      /* ── 11. Quick-Generate Modal ── */
+      window.__openQuickGen = function () {
+        var modal = document.getElementById('quick-gen-modal');
+        if (modal) modal.classList.add('modal-open');
+        setTimeout(function () {
+          var el = document.getElementById('qg-subject'); if (el) el.focus();
+        }, 60);
+      };
+      window.__closeQuickGen = function () {
+        var modal = document.getElementById('quick-gen-modal');
+        if (modal) modal.classList.remove('modal-open');
+      };
+      window.__runQuickGen = function () {
+        var subject    = (document.getElementById('qg-subject')    || {}).value || '';
+        var count      = parseInt((document.getElementById('qg-count')      || {}).value) || 10;
+        var difficulty = (document.getElementById('qg-difficulty') || {}).value || 'Medium';
+        subject = subject.trim();
+        if (!subject) { var el = document.getElementById('qg-subject'); if (el) el.focus(); return; }
+        window.dispatchEvent(new CustomEvent('shell:quickGenerate', {
+          detail: { subject: subject, count: count, difficulty: difficulty }
+        }));
+        window.__closeQuickGen();
+        window.__shellNav(null, 'exams');
+      };
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') window.__closeQuickGen();
+      });
+
+      /* ── Init ── */
+      renderCalendar();
+      buildProgress();
+
+    })();
+  </script>
+
+  <!-- ═══════════════════════ LOCALIZATION OBSERVER ═══════════════════════ -->
   <script>
     (function () {
       const translations = {
         en: {
           navLectures: "📚 Lecture/Lesson analyzer",
           guideTitle: "Exam Modes",
-          modeEasy: "1- Easy mode:",
-          descEasy: "Simple, direct questions",
-          modeMedium: "2- Medium Mode:",
-          descMedium: "Requires complete understanding",
-          modeHard: "3- Hard Mode:",
-          descHard: "Complex scenarios and deep analysis",
-          modeTrickey: "4- Trickey:",
-          descTrickey: "Manipulated questions",
-          modeTrickyMode: "5- Tricky Mode:",
-          descTrickyMode: "Combination of every mode"
+          modeEasy: "1- Easy mode:", descEasy: "Simple, direct questions",
+          modeMedium: "2- Medium Mode:", descMedium: "Requires complete understanding",
+          modeHard: "3- Hard Mode:", descHard: "Complex scenarios and deep analysis",
+          modeTrickey: "4- Trickey:", descTrickey: "Manipulated questions",
+          modeTrickyMode: "5- Tricky Mode:", descTrickyMode: "Combination of every mode"
         },
         ar: {
           navLectures: "📚 تحليل المنهج/ المحاضره",
           guideTitle: "أنماط الاختبار",
-          modeEasy: "١- الوضع السهل:",
-          descEasy: "أسئلة بسيطة ومباشرة",
-          modeMedium: "٢- الوضع المتوسط:",
-          descMedium: "يتطلب فهم كامل",
-          modeHard: "٣- الوضع الصعب:",
-          descHard: "سيناريوهات معقدة وتحليل أعمق",
-          modeTrickey: "٤- مخادع:",
-          descTrickey: "أسئلة متلاعبة",
-          modeTrickyMode: "٥- وضع مخادع:",
-          descTrickyMode: "مزيج من جميع الأوضاع"
+          modeEasy: "١- الوضع السهل:", descEasy: "أسئلة بسيطة ومباشرة",
+          modeMedium: "٢- الوضع المتوسط:", descMedium: "يتطلب فهم كامل",
+          modeHard: "٣- الوضع الصعب:", descHard: "سيناريوهات معقدة وتحليل أعمق",
+          modeTrickey: "٤- مخادع:", descTrickey: "أسئلة متلاعبة",
+          modeTrickyMode: "٥- وضع مخادع:", descTrickyMode: "مزيج من جميع الأوضاع"
         }
       };
 
@@ -271,83 +881,717 @@
         if (!translations[lang]) return;
         const t = translations[lang];
 
-        // Update Navigation Button
         const navBtn = document.getElementById('nav-lecture-link');
         if (navBtn) navBtn.innerHTML = t.navLectures;
 
-        // Update Guide Box
-        const title = document.getElementById('mode-guide-title');
-        if (title) title.textContent = t.guideTitle;
+        const ids = {
+          'mode-guide-title': t.guideTitle,    'mode-easy': t.modeEasy,
+          'mode-easy-desc': t.descEasy,        'mode-medium': t.modeMedium,
+          'mode-medium-desc': t.descMedium,    'mode-hard': t.modeHard,
+          'mode-hard-desc': t.descHard,        'mode-trickey': t.modeTrickey,
+          'mode-trickey-desc': t.descTrickey,  'mode-tricky-mode': t.modeTrickyMode,
+          'mode-tricky-mode-desc': t.descTrickyMode
+        };
+        Object.keys(ids).forEach(function (id) {
+          const el = document.getElementById(id); if (el) el.textContent = ids[id];
+        });
 
-        const me = document.getElementById('mode-easy'); if (me) me.textContent = t.modeEasy;
-        const de = document.getElementById('mode-easy-desc'); if (de) de.textContent = t.descEasy;
+        /* RTL: mirror sidebar + main + right panel positions */
+        const sidebar    = document.getElementById('app-sidebar');
+        const rightPanel = document.getElementById('app-right-panel');
+        const main       = document.getElementById('app-main');
+        if (lang === 'ar') {
+          if (sidebar)    { sidebar.style.left = 'auto'; sidebar.style.right = '0'; }
+          if (rightPanel) { rightPanel.style.right = 'auto'; rightPanel.style.left = '0'; }
+          if (main)       { main.style.marginLeft = '0'; main.style.marginRight = '260px'; }
+        } else {
+          if (sidebar)    { sidebar.style.right = 'auto'; sidebar.style.left = '0'; }
+          if (rightPanel) { rightPanel.style.left = 'auto'; rightPanel.style.right = '0'; }
+          if (main)       { main.style.marginLeft = '260px'; main.style.marginRight = '300px'; }
+        }
+      }
 
-        const mm = document.getElementById('mode-medium'); if (mm) mm.textContent = t.modeMedium;
-        const dm = document.getElementById('mode-medium-desc'); if (dm) dm.textContent = t.descMedium;
+      if (document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar') currentLang = 'ar';
+      updateLocale(currentLang);
 
-        const mh = document.getElementById('mode-hard'); if (mh) mh.textContent = t.modeHard;
-        const dh = document.getElementById('mode-hard-desc'); if (dh) dh.textContent = t.descHard;
+      const observer = new MutationObserver((mutations) => {
+        let changed = false;
+        mutations.forEach((m) => { if (m.type === 'attributes' && (m.attributeName === 'dir' || m.attributeName === 'lang')) changed = true; });
+        if (changed) {
+          const nl = (document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar') ? 'ar' : 'en';
+          if (nl !== currentLang) { currentLang = nl; updateLocale(currentLang); }
+        }
+      });
+      observer.observe(document.documentElement, { attributes: true });
 
-        const mt1 = document.getElementById('mode-trickey'); if (mt1) mt1.textContent = t.modeTrickey;
-        const dt1 = document.getElementById('mode-trickey-desc'); if (dt1) dt1.textContent = t.descTrickey;
+      setInterval(() => {
+        const isAr = document.body.innerText.indexOf('مستوى التعليم') > -1 || document.body.innerText.indexOf('إنشاء امتحان') > -1;
+        const nl = isAr ? 'ar' : 'en';
+        if (nl !== currentLang) { currentLang = nl; updateLocale(currentLang); }
+      }, 1500);
+    })();
+  </script>
 
-        const mt2 = document.getElementById('mode-tricky-mode'); if (mt2) mt2.textContent = t.modeTrickyMode;
-        const dt2 = document.getElementById('mode-tricky-mode-desc'); if (dt2) dt2.textContent = t.descTrickyMode;
+  <!-- ═══════════════════════ PHASE 6: QUICK GENERATE FAB + MODAL ═══════════════════════ -->
 
-        // Adjust Sidebar position based on lang
-        const guide = document.getElementById('exam-modes-guide');
-        if (guide) {
-          if (lang === 'ar') {
-            guide.style.left = 'auto';
-            guide.style.right = '1rem';
-            guide.style.textAlign = 'right';
-          } else {
-            guide.style.right = 'auto';
-            guide.style.left = '1rem';
-            guide.style.textAlign = 'left';
+  <!-- Floating Action Button -->
+  <button id="quick-gen-fab" aria-label="Quick Generate Exam" onclick="window.__openQuickGen()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Quick Exam
+  </button>
+
+  <!-- Modal -->
+  <div id="quick-gen-modal" role="dialog" aria-modal="true" aria-labelledby="quick-gen-title">
+    <div id="quick-gen-backdrop" onclick="window.__closeQuickGen()" aria-hidden="true"></div>
+    <div id="quick-gen-card">
+      <h3 id="quick-gen-title" data-i18n="qgTitle">Quick Generate Exam</h3>
+      <p id="quick-gen-subtitle" data-i18n="qgSubtitle">Fill in the details and we'll build your exam instantly</p>
+      <label class="qg-label" data-i18n="qgSubjectLabel">Subject</label>
+      <input id="qg-subject" class="qg-input" placeholder="e.g. Biology, World History…" data-i18n-placeholder="qgSubjectPlaceholder" autocomplete="off">
+      <div class="qg-row">
+        <div class="qg-col">
+          <label class="qg-label" data-i18n="qgCountLabel">Questions</label>
+          <input id="qg-count" class="qg-input" type="number" value="10" min="5" max="50">
+        </div>
+        <div class="qg-col">
+          <label class="qg-label" data-i18n="qgDifficultyLabel">Difficulty</label>
+          <select id="qg-difficulty" class="qg-input">
+            <option data-i18n-opt="diffEasy">Easy</option>
+            <option data-i18n-opt="diffMedium" selected>Medium</option>
+            <option data-i18n-opt="diffHard">Hard</option>
+            <option data-i18n-opt="diffTricky">Tricky</option>
+          </select>
+        </div>
+      </div>
+      <button id="qg-generate-btn" data-i18n="qgGenerateBtn" onclick="window.__runQuickGen()">⚡ Generate Exam</button>
+      <button id="qg-cancel-btn"   data-i18n="qgCancelBtn"   onclick="window.__closeQuickGen()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ PHASE 6: RECHARTS SCORE CHART ═══════════════════════ -->
+  <script type="module">
+    import { createElement as h } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
+
+    var SCORES = [
+      { name: 'Bio',  score: 92 }, { name: 'Calc', score: 78 },
+      { name: 'Hist', score: 65 }, { name: 'Chem', score: 88 },
+      { name: 'Phys', score: 71 }, { name: 'Eng',  score: 95 },
+      { name: 'Math', score: 82 }, { name: 'Geo',  score: 74 }
+    ];
+    var COLORS = ['#8b5cf6','#d946ef','#0ea5e9','#22c55e','#f59e0b','#ec4899','#06b6d4','#a855f7'];
+
+    function colors() {
+      var dark = (window.__currentTheme || 'dark') === 'dark';
+      return {
+        tick:   dark ? 'rgba(255,255,255,0.42)' : '#94a3b8',
+        grid:   dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+        ttBg:   dark ? 'rgba(12,16,36,0.97)'    : '#ffffff',
+        ttBdr:  dark ? 'rgba(255,255,255,0.12)'  : 'rgba(0,0,0,0.08)',
+        ttClr:  dark ? '#ffffff' : '#1e293b'
+      };
+    }
+
+    function PerfChart() {
+      var c = colors();
+      return h(ResponsiveContainer, { width: '100%', height: 164 },
+        h(BarChart, { data: SCORES, margin: { top: 4, right: 10, left: -28, bottom: 0 } },
+          h(CartesianGrid, { strokeDasharray: '3 3', stroke: c.grid, vertical: false }),
+          h(XAxis, { dataKey: 'name', tick: { fill: c.tick, fontSize: 11 }, axisLine: false, tickLine: false }),
+          h(YAxis, { domain: [0,100], ticks: [0,25,50,75,100], tick: { fill: c.tick, fontSize: 11 }, axisLine: false, tickLine: false }),
+          h(Tooltip, {
+            cursor: { fill: 'rgba(255,255,255,0.04)' },
+            contentStyle: { background: c.ttBg, border: '1px solid ' + c.ttBdr, borderRadius: '10px', color: c.ttClr, fontSize: '12px', fontFamily: 'Inter,sans-serif', boxShadow: '0 8px 24px rgba(0,0,0,0.20)' },
+            labelStyle: { fontWeight: 700 },
+            formatter: function (v) { return [v + '%', 'Score']; }
+          }),
+          h(Bar, { dataKey: 'score', radius: [7,7,0,0], maxBarSize: 38 },
+            ...SCORES.map(function (_, i) { return h(Cell, { key: i, fill: COLORS[i % COLORS.length] }); })
+          )
+        )
+      );
+    }
+
+    var container = document.getElementById('perf-chart-container');
+    if (container) {
+      try { createRoot(container).render(h(PerfChart)); }
+      catch (e) { container.style.display = 'none'; }
+    }
+  </script>
+
+  <!-- ═══════════════════════ PHASE 8: ARABIC / RTL LANGUAGE SUPPORT ═══════════════════════ -->
+  <script>
+  (function () {
+
+    /* ── Translations dictionary ── */
+    var T = {
+      en: {
+        dashSubtitle: "Ready to build today's exam?",
+        statTotalExams: 'Total Exams',       statTotalExamsChange: '+3 this week',
+        statAvgScore: 'Avg Score',           statAvgScoreChange: '+5% vs last month',
+        statQuestionsGen: 'Questions Generated', statQuestionsGenChange: '+24 today',
+        statStudyStreak: 'Study Streak',     statStudyStreakChange: 'Days in a row',
+        sectionScoreHistory: 'Score History', sectionScoreHistoryMeta: 'Last 8 exams',
+        sectionRecentExams: 'Recent Exams',  seeAll: 'See all →',
+        sectionMyExams: 'My Exams',          viewAll: 'View all →',
+        navDashboard: 'Dashboard',    navCourses: 'Courses',       navMyExams: 'My Exams',
+        navGrades: 'Grades',          navSchedule: 'Schedule',     navLectureAnalyzer: 'Lecture Analyzer',
+        navSettings: 'Settings',
+        rightPanelTitle: 'Profile',   rightProgressTitle: 'Exam Progress',
+        premiumTitle: 'Premium subscription',
+        premiumDesc: 'Buy Premium and get access to new courses',
+        premiumBtn: 'More detailed',
+        qgTitle: 'Quick Generate Exam',
+        qgSubtitle: "Fill in the details and we'll build your exam instantly",
+        qgSubjectLabel: 'Subject',    qgCountLabel: 'Questions',   qgDifficultyLabel: 'Difficulty',
+        qgSubjectPlaceholder: 'e.g. Biology, World History\u2026',
+        qgGenerateBtn: '\u26a1 Generate Exam', qgCancelBtn: 'Cancel',
+        diffEasy: 'Easy', diffMedium: 'Medium', diffHard: 'Hard', diffTricky: 'Tricky',
+        tblExam: 'Exam', tblDate: 'Date', tblScore: 'Score', tblLevel: 'Level',
+        progressArrow: '\u203a',
+        calDays: ['Su','Mo','Tu','We','Th','Fr','Sa'],
+        calMonths: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+        greetMorning: 'Good morning', greetAfternoon: 'Good afternoon', greetEvening: 'Good evening',
+        greetSep: ', ',
+        langToggleLabel: 'AR', langToggleBadge: '\u0639\u0631\u0628\u064a',
+        langToggleTip: 'Switch to Arabic / \u0627\u0644\u0639\u0631\u0628\u064a\u0629'
+      },
+      ar: {
+        dashSubtitle: '\u0647\u0644 \u0623\u0646\u062a \u0645\u0633\u062a\u0639\u062f \u0644\u0628\u0646\u0627\u0621 \u0627\u0645\u062a\u062d\u0627\u0646 \u0627\u0644\u064a\u0648\u0645\u061f',
+        statTotalExams: '\u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u0627\u0645\u062a\u062d\u0627\u0646\u0627\u062a',
+        statTotalExamsChange: '+\u0663 \u0647\u0630\u0627 \u0627\u0644\u0623\u0633\u0628\u0648\u0639',
+        statAvgScore: '\u0645\u062a\u0648\u0633\u0637 \u0627\u0644\u062f\u0631\u062c\u0627\u062a',
+        statAvgScoreChange: '+\u0665\u066a \u0645\u0642\u0627\u0631\u0646\u0629\u064b \u0628\u0627\u0644\u0634\u0647\u0631 \u0627\u0644\u0645\u0627\u0636\u064a',
+        statQuestionsGen: '\u0627\u0644\u0623\u0633\u0626\u0644\u0629 \u0627\u0644\u0645\u064f\u0646\u0634\u0623\u0629',
+        statQuestionsGenChange: '+\u0662\u0664 \u0627\u0644\u064a\u0648\u0645',
+        statStudyStreak: '\u0633\u0644\u0633\u0644\u0629 \u0627\u0644\u0645\u0630\u0627\u0643\u0631\u0629',
+        statStudyStreakChange: '\u0623\u064a\u0627\u0645 \u0645\u062a\u062a\u0627\u0644\u064a\u0629',
+        sectionScoreHistory: '\u0633\u062c\u0644 \u0627\u0644\u062f\u0631\u062c\u0627\u062a',
+        sectionScoreHistoryMeta: '\u0622\u062e\u0631 \u0668 \u0627\u0645\u062a\u062d\u0627\u0646\u0627\u062a',
+        sectionRecentExams: '\u0627\u0644\u0627\u0645\u062a\u062d\u0627\u0646\u0627\u062a \u0627\u0644\u0623\u062e\u064a\u0631\u0629',
+        seeAll: '\u2190 \u0639\u0631\u0636 \u0627\u0644\u0643\u0644',
+        sectionMyExams: '\u0627\u0645\u062a\u062d\u0627\u0646\u0627\u062a\u064a',
+        viewAll: '\u2190 \u0639\u0631\u0636 \u0627\u0644\u0643\u0644',
+        navDashboard: '\u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u062d\u0643\u0645',
+        navCourses: '\u0627\u0644\u0645\u0642\u0631\u0631\u0627\u062a',
+        navMyExams: '\u0627\u0645\u062a\u062d\u0627\u0646\u0627\u062a\u064a',
+        navGrades: '\u0627\u0644\u062f\u0631\u062c\u0627\u062a',
+        navSchedule: '\u0627\u0644\u062c\u062f\u0648\u0644 \u0627\u0644\u062f\u0631\u0627\u0633\u064a',
+        navLectureAnalyzer: '\u0645\u062d\u0644\u0644 \u0627\u0644\u0645\u062d\u0627\u0636\u0631\u0627\u062a',
+        navSettings: '\u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a',
+        rightPanelTitle: '\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a',
+        rightProgressTitle: '\u062a\u0642\u062f\u0645 \u0627\u0644\u0627\u0645\u062a\u062d\u0627\u0646\u0627\u062a',
+        premiumTitle: '\u0627\u0644\u0627\u0634\u062a\u0631\u0627\u0643 \u0627\u0644\u0645\u0645\u064a\u0632',
+        premiumDesc: '\u0627\u0634\u062a\u0631\u0650 \u0627\u0644\u0645\u0645\u064a\u0632 \u0648\u0627\u062d\u0635\u0644 \u0639\u0644\u0649 \u0645\u0642\u0631\u0631\u0627\u062a \u062c\u062f\u064a\u062f\u0629',
+        premiumBtn: '\u0627\u0644\u0645\u0632\u064a\u062f',
+        qgTitle: '\u0625\u0646\u0634\u0627\u0621 \u0627\u0645\u062a\u062d\u0627\u0646 \u0633\u0631\u064a\u0639',
+        qgSubtitle: '\u0623\u062f\u062e\u0644 \u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644 \u0648\u0633\u0646\u0628\u0646\u064a \u0627\u0645\u062a\u062d\u0627\u0646\u0643 \u0641\u0648\u0631\u0627\u064b',
+        qgSubjectLabel: '\u0627\u0644\u0645\u0627\u062f\u0629',
+        qgCountLabel: '\u0639\u062f\u062f \u0627\u0644\u0623\u0633\u0626\u0644\u0629',
+        qgDifficultyLabel: '\u0627\u0644\u0635\u0639\u0648\u0628\u0629',
+        qgSubjectPlaceholder: '\u0645\u062b\u0644: \u0627\u0644\u0623\u062d\u064a\u0627\u0621\u060c \u0627\u0644\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0639\u0627\u0644\u0645\u064a\u2026',
+        qgGenerateBtn: '\u26a1 \u0625\u0646\u0634\u0627\u0621 \u0627\u0644\u0627\u0645\u062a\u062d\u0627\u0646',
+        qgCancelBtn: '\u0625\u0644\u063a\u0627\u0621',
+        diffEasy: '\u0633\u0647\u0644', diffMedium: '\u0645\u062a\u0648\u0633\u0637',
+        diffHard: '\u0635\u0639\u0628', diffTricky: '\u0635\u0639\u0628 \u062c\u062f\u0627\u064b',
+        tblExam: '\u0627\u0644\u0627\u0645\u062a\u062d\u0627\u0646', tblDate: '\u0627\u0644\u062a\u0627\u0631\u064a\u062e',
+        tblScore: '\u0627\u0644\u062f\u0631\u062c\u0629', tblLevel: '\u0627\u0644\u0645\u0633\u062a\u0648\u0649',
+        progressArrow: '\u2039',
+        calDays: ['\u0623\u062d','\u0625\u062b','\u062b','\u0623\u0631','\u062e','\u062c','\u0633'],
+        calMonths: ['\u064a\u0646\u0627\u064a\u0631','\u0641\u0628\u0631\u0627\u064a\u0631','\u0645\u0627\u0631\u0633','\u0623\u0628\u0631\u064a\u0644','\u0645\u0627\u064a\u0648','\u064a\u0648\u0646\u064a\u0648','\u064a\u0648\u0644\u064a\u0648','\u0623\u063a\u0633\u0637\u0633','\u0633\u0628\u062a\u0645\u0628\u0631','\u0623\u0643\u062a\u0648\u0628\u0631','\u0646\u0648\u0641\u0645\u0628\u0631','\u062f\u064a\u0633\u0645\u0628\u0631'],
+        greetMorning: '\u0635\u0628\u0627\u062d \u0627\u0644\u062e\u064a\u0631',
+        greetAfternoon: '\u0645\u0633\u0627\u0621 \u0627\u0644\u062e\u064a\u0631',
+        greetEvening: '\u0645\u0633\u0627\u0621 \u0627\u0644\u0646\u0648\u0631',
+        greetSep: '\u060c ',
+        langToggleLabel: 'EN', langToggleBadge: 'EN',
+        langToggleTip: 'Switch to English'
+      }
+    };
+
+    /* ── Bilingual dynamic data ── */
+    var COURSES = {
+      en: [
+        { emoji: '\uD83D\uDD2C', subject: 'Science',     name: 'Biology Final Exam',   lessons: '24 questions', gradient: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', color: '#0ea5e9', avatars: ['A','B','C'] },
+        { emoji: '\u2797',       subject: 'Mathematics', name: 'Calculus Mid-Term',    lessons: '30 questions', gradient: 'linear-gradient(135deg,#8b5cf6,#d946ef)', color: '#8b5cf6', avatars: ['D','E']     },
+        { emoji: '\u2697\uFE0F', subject: 'Chemistry',   name: 'Organic Chemistry',    lessons: '18 questions', gradient: 'linear-gradient(135deg,#f59e0b,#ef4444)', color: '#f59e0b', avatars: ['F','G','H'] },
+        { emoji: '\uD83D\uDCDC', subject: 'History',     name: 'World History Quiz',   lessons: '15 questions', gradient: 'linear-gradient(135deg,#22c55e,#10b981)', color: '#22c55e', avatars: ['I','J']     }
+      ],
+      ar: [
+        { emoji: '\uD83D\uDD2C', subject: '\u0627\u0644\u0639\u0644\u0648\u0645',      name: '\u0627\u0644\u0627\u0645\u062a\u062d\u0627\u0646 \u0627\u0644\u0646\u0647\u0627\u0626\u064a \u0641\u064a \u0627\u0644\u0623\u062d\u064a\u0627\u0621', lessons: '\u0662\u0664 \u0633\u0624\u0627\u0644\u0627\u064b', gradient: 'linear-gradient(135deg,#0ea5e9,#06b6d4)', color: '#0ea5e9', avatars: ['\u0623','\u0628','\u062c'] },
+        { emoji: '\u2797',       subject: '\u0627\u0644\u0631\u064a\u0627\u0636\u064a\u0627\u062a', name: '\u0627\u0645\u062a\u062d\u0627\u0646 \u0645\u0646\u062a\u0635\u0641 \u0627\u0644\u0641\u0635\u0644 \u0641\u064a \u0627\u0644\u062a\u0641\u0627\u0636\u0644', lessons: '\u0663\u0660 \u0633\u0624\u0627\u0644\u0627\u064b', gradient: 'linear-gradient(135deg,#8b5cf6,#d946ef)', color: '#8b5cf6', avatars: ['\u062f','\u0647\u0640'] },
+        { emoji: '\u2697\uFE0F', subject: '\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621', name: '\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621 \u0627\u0644\u0639\u0636\u0648\u064a\u0629', lessons: '\u0661\u0668 \u0633\u0624\u0627\u0644\u0627\u064b', gradient: 'linear-gradient(135deg,#f59e0b,#ef4444)', color: '#f59e0b', avatars: ['\u0648','\u0632','\u062d'] },
+        { emoji: '\uD83D\uDCDC', subject: '\u0627\u0644\u062a\u0627\u0631\u064a\u062e',  name: '\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u062a\u0627\u0631\u064a\u062e \u0627\u0644\u0639\u0627\u0644\u0645\u064a',  lessons: '\u0661\u0665 \u0633\u0624\u0627\u0644\u0627\u064b', gradient: 'linear-gradient(135deg,#22c55e,#10b981)', color: '#22c55e', avatars: ['\u0637','\u064a']     }
+      ]
+    };
+
+    var EXAMS = {
+      en: [
+        { icon: '\uD83D\uDD2C', iconBg: 'rgba(14,165,233,0.20)',  title: 'Biology Final',     qs: '24 questions', date: 'Mar 15, 2026', stars: 5, level: 'Hard',   levelClass: 'level-hard'   },
+        { icon: '\u2797',       iconBg: 'rgba(139,92,246,0.20)',  title: 'Calculus Mid-Term', qs: '30 questions', date: 'Mar 10, 2026', stars: 4, level: 'Hard',   levelClass: 'level-hard'   },
+        { icon: '\uD83D\uDCDC', iconBg: 'rgba(34,197,94,0.20)',   title: 'World History Quiz',qs: '15 questions', date: 'Mar 5, 2026',  stars: 3, level: 'Medium', levelClass: 'level-medium' },
+        { icon: '\u2697\uFE0F', iconBg: 'rgba(245,158,11,0.20)',  title: 'Organic Chemistry', qs: '18 questions', date: 'Feb 28, 2026', stars: 4, level: 'Easy',   levelClass: 'level-easy'   }
+      ],
+      ar: [
+        { icon: '\uD83D\uDD2C', iconBg: 'rgba(14,165,233,0.20)',  title: '\u0627\u0644\u0623\u062d\u064a\u0627\u0621 \u0627\u0644\u0646\u0647\u0627\u0626\u064a',     qs: '\u0662\u0664 \u0633\u0624\u0627\u0644\u0627\u064b', date: '\u0661\u0665 \u0645\u0627\u0631\u0633 \u0662\u0660\u0662\u0666', stars: 5, level: '\u0635\u0639\u0628',    levelClass: 'level-hard'   },
+        { icon: '\u2797',       iconBg: 'rgba(139,92,246,0.20)',  title: '\u0627\u0645\u062a\u062d\u0627\u0646 \u0627\u0644\u062a\u0641\u0627\u0636\u0644',  qs: '\u0663\u0660 \u0633\u0624\u0627\u0644\u0627\u064b', date: '\u0661\u0660 \u0645\u0627\u0631\u0633 \u0662\u0660\u0662\u0666', stars: 4, level: '\u0635\u0639\u0628',    levelClass: 'level-hard'   },
+        { icon: '\uD83D\uDCDC', iconBg: 'rgba(34,197,94,0.20)',   title: '\u0627\u062e\u062a\u0628\u0627\u0631 \u0627\u0644\u062a\u0627\u0631\u064a\u062e', qs: '\u0661\u0665 \u0633\u0624\u0627\u0644\u0627\u064b', date: '\u0665 \u0645\u0627\u0631\u0633 \u0662\u0660\u0662\u0666',   stars: 3, level: '\u0645\u062a\u0648\u0633\u0637', levelClass: 'level-medium' },
+        { icon: '\u2697\uFE0F', iconBg: 'rgba(245,158,11,0.20)',  title: '\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621 \u0627\u0644\u0639\u0636\u0648\u064a\u0629', qs: '\u0661\u0668 \u0633\u0624\u0627\u0644\u0627\u064b', date: '\u0662\u0668 \u0641\u0628\u0631\u0627\u064a\u0631 \u0662\u0660\u0662\u0666', stars: 4, level: '\u0633\u0647\u0644',    levelClass: 'level-easy'   }
+      ]
+    };
+
+    var PROGRESS = {
+      en: [
+        { pct: 50, label: 'Active Exam',  sub: '12 questions', active: true,  stroke: 'stroke:#fff' },
+        { pct: 65, label: 'Study Goal',   sub: '18 tasks',     active: false, stroke: 'stroke:var(--prism-violet)' },
+        { pct: 25, label: 'Last Lecture', sub: '10 concepts',  active: false, stroke: 'stroke:var(--prism-violet)' }
+      ],
+      ar: [
+        { pct: 50, label: '\u0627\u0645\u062a\u062d\u0627\u0646 \u0646\u0634\u0637',   sub: '\u0661\u0662 \u0633\u0624\u0627\u0644\u0627\u064b', active: true,  stroke: 'stroke:#fff' },
+        { pct: 65, label: '\u0647\u062f\u0641 \u0627\u0644\u0645\u0630\u0627\u0643\u0631\u0629', sub: '\u0661\u0668 \u0645\u0647\u0645\u0629',    active: false, stroke: 'stroke:var(--prism-violet)' },
+        { pct: 25, label: '\u0622\u062e\u0631 \u0645\u062d\u0627\u0636\u0631\u0629',  sub: '\u0661\u0660 \u0645\u0641\u0627\u0647\u064a\u0645', active: false, stroke: 'stroke:var(--prism-violet)' }
+      ]
+    };
+
+    /* ── Builder helpers ── */
+    function buildCourseCards(lang) {
+      var row = document.getElementById('dash-courses-row');
+      if (!row) return;
+      var cards = COURSES[lang] || COURSES.en;
+      row.innerHTML = '';
+      cards.forEach(function (c) {
+        var avHtml = c.avatars.map(function (l) {
+          return '<div class="course-avatar" style="background:' + c.color + ';">' + l + '</div>';
+        }).join('');
+        var div = document.createElement('div');
+        div.className = 'course-card';
+        div.innerHTML =
+          '<div class="course-thumb" style="background:' + c.gradient + ';">' + c.emoji + '</div>'
+          + '<div class="course-body">'
+          + '<div class="course-subject" style="color:' + c.color + ';">' + c.subject + '</div>'
+          + '<div class="course-name">' + c.name + '</div>'
+          + '<div class="course-meta"><span class="course-lessons">' + c.lessons + '</span>'
+          + '<div class="course-avatars">' + avHtml + '</div></div>'
+          + '</div>';
+        row.appendChild(div);
+      });
+      setTimeout(function () { window.__tiltify && window.__tiltify('.course-card', 7); }, 30);
+    }
+
+    function buildExamsTable(lang) {
+      var table = document.getElementById('dash-exams-table');
+      if (!table) return;
+      var t = T[lang] || T.en;
+      var rows = EXAMS[lang] || EXAMS.en;
+      var html = '<div class="exams-table-row exams-thead"><div>' + t.tblExam + '</div><div>' + t.tblDate + '</div><div>' + t.tblScore + '</div><div>' + t.tblLevel + '</div></div>';
+      rows.forEach(function (r) {
+        var stars = '';
+        for (var i = 1; i <= 5; i++) stars += (i <= r.stars ? '\u2605' : '\u2606');
+        var starColor = r.stars >= 4 ? '#f59e0b' : '#94a3b8';
+        html +=
+          '<div class="exams-table-row">'
+          + '<div class="exam-name-cell">'
+          + '<div class="exam-icon" style="background:' + r.iconBg + ';">' + r.icon + '</div>'
+          + '<div><div class="exam-title">' + r.title + '</div><div class="exam-qs">' + r.qs + '</div></div>'
+          + '</div>'
+          + '<div class="exam-date">' + r.date + '</div>'
+          + '<div class="exam-stars" style="color:' + starColor + ';">' + stars + '</div>'
+          + '<div><span class="exam-level ' + r.levelClass + '">' + r.level + '</span></div>'
+          + '</div>';
+      });
+      table.innerHTML = html;
+    }
+
+    function buildProgress(lang) {
+      var list = document.getElementById('progress-list');
+      if (!list) return;
+      var t = T[lang] || T.en;
+      var items = PROGRESS[lang] || PROGRESS.en;
+      var R = 15, C = +(2 * Math.PI * R).toFixed(2);
+      list.innerHTML = '';
+      items.forEach(function (item) {
+        var offset = +(C * (1 - item.pct / 100)).toFixed(2);
+        var ring =
+          '<svg width="40" height="40" viewBox="0 0 40 40">'
+          + '<circle class="prog-bg-ring" cx="20" cy="20" r="' + R + '" fill="none" stroke-width="3"/>'
+          + '<circle class="progress-ring-fill" cx="20" cy="20" r="' + R + '" fill="none"'
+          + ' stroke-width="3" stroke-linecap="round"'
+          + ' stroke-dasharray="' + C + '" stroke-dashoffset="' + C + '"'
+          + ' data-target="' + offset + '"'
+          + ' style="' + item.stroke + ';transform:rotate(-90deg);transform-origin:center;"/>'
+          + '</svg><span class="progress-pct">' + item.pct + '%</span>';
+        var div = document.createElement('div');
+        div.className = 'progress-item ' + (item.active ? 'progress-active' : 'progress-inactive');
+        div.innerHTML =
+          '<div class="progress-ring-wrap">' + ring + '</div>'
+          + '<div class="progress-info">'
+          + '<div class="progress-label">' + item.label + '</div>'
+          + '<div class="progress-sublabel">' + item.sub + '</div>'
+          + '</div>'
+          + '<span class="progress-arrow">' + t.progressArrow + '</span>';
+        list.appendChild(div);
+      });
+      requestAnimationFrame(function () {
+        document.querySelectorAll('.progress-ring-fill').forEach(function (el) {
+          el.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';
+          el.style.strokeDashoffset = el.getAttribute('data-target');
+        });
+      });
+      setTimeout(function () { window.__tiltify && window.__tiltify('.progress-item', 5); }, 30);
+    }
+
+    /* ── Main apply function ── */
+    function applyLang(lang) {
+      window.__currentLang = lang;
+      localStorage.setItem('appLang', lang);
+      var t = T[lang] || T.en;
+      var isAr = lang === 'ar';
+
+      /* Document direction */
+      document.documentElement.setAttribute('dir',  isAr ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('lang', isAr ? 'ar'  : 'en');
+
+      /* data-i18n elements */
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n');
+        if (t[key] !== undefined) el.textContent = t[key];
+      });
+
+      /* data-i18n-placeholder */
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n-placeholder');
+        if (t[key] !== undefined) el.placeholder = t[key];
+      });
+
+      /* Select options */
+      document.querySelectorAll('[data-i18n-opt]').forEach(function (el) {
+        var key = el.getAttribute('data-i18n-opt');
+        if (t[key] !== undefined) el.textContent = t[key];
+      });
+
+      /* Calendar day labels */
+      document.querySelectorAll('.cal-day-label[data-day]').forEach(function (el) {
+        var idx = parseInt(el.getAttribute('data-day'));
+        el.textContent = t.calDays[idx];
+      });
+
+      /* Calendar month label */
+      var calLabel = document.getElementById('cal-month-year');
+      if (calLabel) {
+        var txt = calLabel.textContent;
+        var enM = T.en.calMonths, arM = T.ar.calMonths;
+        var allM = enM.concat(arM);
+        for (var mi = 0; mi < allM.length; mi++) {
+          if (txt.indexOf(allM[mi]) > -1) {
+            var yr = txt.replace(allM[mi], '').trim();
+            var realIdx = mi < 12 ? mi : mi - 12;
+            calLabel.textContent = (isAr ? arM[realIdx] : enM[realIdx]) + ' ' + yr;
+            break;
           }
         }
       }
 
-      // Apply initial check
-      if (document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar') {
-        currentLang = 'ar';
+      /* Greeting */
+      var greetEl = document.getElementById('dash-greeting');
+      if (greetEl) {
+        var name = window.__profileFirstName || 'Scholar';
+        var cur = greetEl.textContent;
+        /* Try to extract name from current text */
+        var enSep = cur.indexOf(', '), arSep = cur.indexOf('\u060c ');
+        var sep = (arSep > -1 && (enSep === -1 || arSep < enSep)) ? arSep : enSep;
+        if (sep > -1) {
+          var extracted = cur.substring(sep + 2).replace(' \uD83D\uDC4B', '').replace('\uD83D\uDC4B', '').trim();
+          if (extracted) { name = extracted; window.__profileFirstName = extracted; }
+        }
+        var h = new Date().getHours();
+        var g = h < 12 ? t.greetMorning : h < 18 ? t.greetAfternoon : t.greetEvening;
+        greetEl.textContent = g + t.greetSep + name + ' \uD83D\uDC4B';
       }
-      updateLocale(currentLang);
 
-      // Setup MutationObserver to watch html tag for 'dir' or class changes
-      const observer = new MutationObserver((mutations) => {
-        let needsUpdate = false;
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && (mutation.attributeName === 'dir' || mutation.attributeName === 'lang')) {
-            needsUpdate = true;
+      /* Language toggle button */
+      var langLabel = document.getElementById('lang-toggle-label');
+      var langBadge = document.getElementById('lang-toggle-badge');
+      var langBtn   = document.getElementById('lang-toggle-btn');
+      if (langLabel) langLabel.textContent = t.langToggleLabel;
+      if (langBadge) langBadge.textContent = t.langToggleBadge;
+      if (langBtn)   langBtn.setAttribute('aria-label', t.langToggleTip);
+
+      /* Rebuild dynamic content */
+      buildCourseCards(lang);
+      buildExamsTable(lang);
+      buildProgress(lang);
+
+      /* Sidebar layout via inline styles (mirrors CSS [dir=rtl]) */
+      var sidebar    = document.getElementById('app-sidebar');
+      var main       = document.getElementById('app-main');
+      var rightPanel = document.getElementById('app-right-panel');
+      if (isAr) {
+        if (sidebar)    { sidebar.style.left = 'auto';  sidebar.style.right = '0'; }
+        if (rightPanel) { rightPanel.style.right = 'auto'; rightPanel.style.left = '0'; }
+        if (main && window.innerWidth > 1300) { main.style.marginLeft = '300px'; main.style.marginRight = '260px'; }
+        else if (main && window.innerWidth > 900)  { main.style.marginLeft = '0'; main.style.marginRight = '260px'; }
+        else if (main && window.innerWidth > 640)  { main.style.marginLeft = '0'; main.style.marginRight = '64px'; }
+        else if (main)  { main.style.marginLeft = '0'; main.style.marginRight = '0'; }
+      } else {
+        if (sidebar)    { sidebar.style.right = 'auto'; sidebar.style.left = '0'; }
+        if (rightPanel) { rightPanel.style.left = 'auto';  rightPanel.style.right = '0'; }
+        if (main && window.innerWidth > 1300) { main.style.marginLeft = '260px'; main.style.marginRight = '300px'; }
+        else if (main && window.innerWidth > 900)  { main.style.marginLeft = '260px'; main.style.marginRight = '0'; }
+        else if (main && window.innerWidth > 640)  { main.style.marginLeft = '64px';  main.style.marginRight = '0'; }
+        else if (main)  { main.style.marginLeft = '0'; main.style.marginRight = '0'; }
+      }
+    }
+
+    window.__toggleLang = function () {
+      applyLang(window.__currentLang === 'en' ? 'ar' : 'en');
+    };
+
+    /* Keep greeting translated even when profile watcher fires */
+    window.__profileFirstName = window.__profileFirstName || 'Scholar';
+    var greetEl = document.getElementById('dash-greeting');
+    if (greetEl) {
+      new MutationObserver(function () {
+        if (window.__currentLang !== 'ar') return;
+        var txt = greetEl.textContent;
+        if (txt && txt.indexOf('Good ') === 0) {
+          /* Profile watcher wrote English — re-apply Arabic */
+          var sep = txt.indexOf(', ');
+          if (sep > -1) {
+            var n = txt.substring(sep + 2).replace(' \uD83D\uDC4B', '').replace('\uD83D\uDC4B', '').trim();
+            if (n) window.__profileFirstName = n;
           }
-        });
+          var h = new Date().getHours();
+          var ta = T.ar;
+          var gr = h < 12 ? ta.greetMorning : h < 18 ? ta.greetAfternoon : ta.greetEvening;
+          greetEl.textContent = gr + ta.greetSep + (window.__profileFirstName || 'Scholar') + ' \uD83D\uDC4B';
+        }
+      }).observe(greetEl, { childList: true, subtree: true, characterData: true });
+    }
 
-        if (needsUpdate) {
-          const newLang = (document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar') ? 'ar' : 'en';
-          if (newLang !== currentLang) {
-            currentLang = newLang;
-            updateLocale(currentLang);
+    /* Init */
+    window.__currentLang = localStorage.getItem('appLang') || 'en';
+    applyLang(window.__currentLang);
+
+  })();
+  </script>
+
+  <!-- ═══════════════════════ PHASE 7: RESPONSIVE + ACCESSIBILITY ═══════════════════════ -->
+  <script>
+    (function () {
+
+      /* ── Mobile sidebar toggle ── */
+      window.__toggleSidebar = function () {
+        var sidebar = document.getElementById('app-sidebar');
+        var overlay = document.getElementById('sidebar-overlay');
+        var btn     = document.getElementById('menu-toggle');
+        var isOpen  = sidebar && sidebar.classList.contains('sidebar-open');
+        if (isOpen) {
+          window.__closeSidebar();
+        } else {
+          if (sidebar) sidebar.classList.add('sidebar-open');
+          if (overlay) overlay.classList.add('overlay-open');
+          if (btn)     { btn.classList.add('is-open'); btn.setAttribute('aria-expanded', 'true'); }
+          /* Move focus into sidebar for keyboard users */
+          var firstNav = sidebar && sidebar.querySelector('.s-nav-item');
+          if (firstNav) setTimeout(function () { firstNav.focus(); }, 50);
+        }
+      };
+
+      window.__closeSidebar = function () {
+        var sidebar = document.getElementById('app-sidebar');
+        var overlay = document.getElementById('sidebar-overlay');
+        var btn     = document.getElementById('menu-toggle');
+        if (sidebar) sidebar.classList.remove('sidebar-open');
+        if (overlay) overlay.classList.remove('overlay-open');
+        if (btn)     { btn.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); }
+      };
+
+      /* Close sidebar when a nav item is tapped on mobile */
+      document.querySelectorAll('.s-nav-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          if (window.innerWidth <= 640) window.__closeSidebar();
+        });
+      });
+
+      /* Close sidebar on Escape key */
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          var sidebar = document.getElementById('app-sidebar');
+          if (sidebar && sidebar.classList.contains('sidebar-open')) {
+            window.__closeSidebar();
+            var btn = document.getElementById('menu-toggle');
+            if (btn) btn.focus();
           }
         }
       });
 
-      observer.observe(document.documentElement, { attributes: true });
+      /* ── Patch __shellNav to update aria-current ── */
+      var _origNav = window.__shellNav;
+      window.__shellNav = function (el, view) {
+        var result = _origNav.call(window, el, view);
+        var activeView = (el && el.getAttribute('data-view')) || view || 'dashboard';
+        document.querySelectorAll('.s-nav-item[data-view]').forEach(function (n) {
+          n.removeAttribute('aria-current');
+        });
+        var activeEl = el || document.querySelector('.s-nav-item[data-view="' + activeView + '"]');
+        if (activeEl) activeEl.setAttribute('aria-current', 'page');
+        return result;
+      };
 
-      observer.observe(document.documentElement, { attributes: true });
+      /* ── Modal focus trap ── */
+      (function () {
+        var FOCUSABLE = 'button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])';
 
-      // Backup periodic check specifically for toggle instead of heavy DOM mutation
-      setInterval(() => {
-        const isArabicNow = document.body.innerText.indexOf('مستوى التعليم') > -1 || document.body.innerText.indexOf('إنشاء امتحان') > -1;
-        const detectedLang = isArabicNow ? 'ar' : 'en';
-        if (detectedLang !== currentLang) {
-          currentLang = detectedLang;
-          updateLocale(currentLang);
-        }
-      }, 1500);
+        document.addEventListener('keydown', function (e) {
+          var modal = document.getElementById('quick-gen-modal');
+          if (!modal || !modal.classList.contains('modal-open')) return;
+
+          /* Tab key — trap focus inside modal */
+          if (e.key === 'Tab') {
+            var focusable = Array.from(document.getElementById('quick-gen-card').querySelectorAll(FOCUSABLE));
+            if (!focusable.length) return;
+            var first = focusable[0], last = focusable[focusable.length - 1];
+            if (e.shiftKey) {
+              if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+            } else {
+              if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+            }
+          }
+
+          /* Enter in subject input triggers generation */
+          if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'qg-subject') {
+            e.preventDefault();
+            window.__runQuickGen && window.__runQuickGen();
+          }
+        });
+
+        /* When modal opens, move focus to first input */
+        var _origOpen = window.__openQuickGen;
+        window.__openQuickGen = function () {
+          _origOpen.call(window);
+          var modal = document.getElementById('quick-gen-modal');
+          if (modal) modal.removeAttribute('aria-hidden');
+        };
+        var _origClose = window.__closeQuickGen;
+        window.__closeQuickGen = function () {
+          _origClose.call(window);
+          var modal = document.getElementById('quick-gen-modal');
+          if (modal) modal.setAttribute('aria-hidden', 'true');
+          /* Return focus to FAB */
+          var fab = document.getElementById('quick-gen-fab');
+          if (fab) fab.focus();
+        };
+        /* Init: modal is closed, mark hidden */
+        var modal = document.getElementById('quick-gen-modal');
+        if (modal) modal.setAttribute('aria-hidden', 'true');
+      })();
+
+      /* ── Touch swipe for course row (momentum already handled by CSS snap) ── */
+      (function () {
+        var row = document.getElementById('dash-courses-row');
+        if (!row) return;
+        var startX = 0, startScrollLeft = 0, isDragging = false;
+
+        row.addEventListener('mousedown', function (e) {
+          isDragging = true;
+          startX = e.pageX - row.offsetLeft;
+          startScrollLeft = row.scrollLeft;
+          row.style.cursor = 'grabbing';
+        });
+        row.addEventListener('mouseleave', function () {
+          isDragging = false;
+          row.style.cursor = '';
+        });
+        row.addEventListener('mouseup', function () {
+          isDragging = false;
+          row.style.cursor = '';
+        });
+        row.addEventListener('mousemove', function (e) {
+          if (!isDragging) return;
+          e.preventDefault();
+          var x = e.pageX - row.offsetLeft;
+          row.scrollLeft = startScrollLeft - (x - startX);
+        });
+      })();
+
     })();
   </script>
-</body>
 
+  <!-- ═══════════════════════ PHASE 5: 3D CARD TILT ═══════════════════════ -->
+  <script>
+    (function () {
+      var PERSP  = 900;  /* perspective depth in px */
+      var LERPF  = 0.11; /* lerp factor — lower = smoother/laggier */
+
+      function lerp(a, b, f) { return a + (b - a) * f; }
+
+      function tiltify(selector, maxDeg) {
+        document.querySelectorAll(selector).forEach(function (el) {
+          if (el.dataset.tiltBound) return; /* guard against duplicate listeners */
+          el.dataset.tiltBound = '1';
+
+          var rotX = 0, rotY = 0, tX = 0, tY = 0;
+          var rafId = null, inside = false;
+
+          function tick() {
+            rotX = lerp(rotX, tX, LERPF);
+            rotY = lerp(rotY, tY, LERPF);
+
+            if (!inside && Math.abs(rotX) < 0.04 && Math.abs(rotY) < 0.04) {
+              el.style.transform  = '';
+              el.style.transition = '';
+              el.style.willChange = '';
+              rafId = null;
+              return;
+            }
+
+            el.style.transform =
+              'perspective(' + PERSP + 'px)'
+              + ' rotateX(' + rotY.toFixed(2) + 'deg)'
+              + ' rotateY(' + rotX.toFixed(2) + 'deg)'
+              + ' translateZ(8px)';
+            rafId = requestAnimationFrame(tick);
+          }
+
+          el.addEventListener('mouseenter', function () {
+            inside = true;
+            el.style.willChange = 'transform';
+            el.style.transition = 'box-shadow 0.25s ease'; /* suppress CSS transform transition */
+            if (!rafId) rafId = requestAnimationFrame(tick);
+          });
+
+          el.addEventListener('mousemove', function (e) {
+            var r  = el.getBoundingClientRect();
+            var nx = (e.clientX - r.left) / r.width  * 2 - 1; /* −1 … +1 */
+            var ny = (e.clientY - r.top)  / r.height * 2 - 1; /* −1 … +1 */
+            tX =  maxDeg * nx;
+            tY = -maxDeg * ny;
+          });
+
+          el.addEventListener('mouseleave', function () {
+            inside = false;
+            tX = 0; tY = 0;
+            if (!rafId) rafId = requestAnimationFrame(tick);
+          });
+        });
+      }
+
+      /* Expose globally so Phase 8 can re-apply after language rebuild */
+      window.__tiltify = tiltify;
+
+      /* Stat cards — moderate tilt */
+      tiltify('.stat-card',   10);
+
+      /* Course cards — gentler tilt (taller element) */
+      tiltify('.course-card',  7);
+
+      /* Right-panel progress items — subtle tilt */
+      tiltify('.progress-item', 5);
+
+    })();
+  </script>
+
+</body>
 </html>
