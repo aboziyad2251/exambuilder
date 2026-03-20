@@ -407,6 +407,78 @@
 
         </div><!-- end #dash-profile-view -->
 
+        <!-- ══ EXAM HISTORY & ANALYTICS PAGE ══ -->
+        <div id="dash-history-view" style="display:none;flex-direction:column;gap:24px;">
+
+          <!-- Page header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <h1 class="dash-section-title" style="font-size:24px;">Exam History</h1>
+              <p style="color:var(--text-muted,#94a3b8);font-size:13px;margin:4px 0 0;">Your performance over time</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button onclick="window.__exportHistoryPDF()" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.1);cursor:pointer;font-family:Inter,sans-serif;color:#a78bfa;font-size:13px;font-weight:600;">⬇ Export PDF</button>
+              <button onclick="window.__shellNav(null,'dashboard')" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);cursor:pointer;font-family:Inter,sans-serif;color:inherit;font-size:13px;">← Dashboard</button>
+            </div>
+          </div>
+
+          <!-- Summary stats row -->
+          <div id="hist-stats-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;"></div>
+
+          <!-- Score trend chart -->
+          <div class="gcard" style="padding:24px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+              <h3 style="font-size:15px;font-weight:800;margin:0;color:var(--text-primary,#e2e8f0);">Score Trend</h3>
+              <div style="display:flex;gap:6px;">
+                <button class="hist-filter-btn hist-filter-active" data-range="all"  onclick="window.__setHistRange(this,'all')"  style="padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(139,92,246,0.4);background:rgba(139,92,246,0.2);color:#a78bfa;">All</button>
+                <button class="hist-filter-btn" data-range="month" onclick="window.__setHistRange(this,'month')" style="padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;">Month</button>
+                <button class="hist-filter-btn" data-range="week"  onclick="window.__setHistRange(this,'week')"  style="padding:4px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#64748b;">Week</button>
+              </div>
+            </div>
+            <div id="hist-chart-wrap" style="width:100%;height:180px;position:relative;overflow:hidden;">
+              <svg id="hist-chart-svg" width="100%" height="180" style="overflow:visible;"></svg>
+            </div>
+          </div>
+
+          <!-- Subject breakdown -->
+          <div class="gcard" style="padding:24px;">
+            <h3 style="font-size:15px;font-weight:800;margin:0 0 16px;color:var(--text-primary,#e2e8f0);">Subject Breakdown</h3>
+            <div id="hist-subject-bars" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+
+          <!-- Filters + Table -->
+          <div class="gcard" style="padding:24px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+              <h3 style="font-size:15px;font-weight:800;margin:0;color:var(--text-primary,#e2e8f0);flex:1;">All Exams</h3>
+              <select id="hist-filter-diff" onchange="window.__renderHistTable()" style="background:#1e293b;border:1px solid rgba(139,92,246,0.25);border-radius:8px;padding:5px 10px;color:#e2e8f0;font-size:12px;cursor:pointer;outline:none;">
+                <option value="all">All Difficulties</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+              <select id="hist-filter-subj" onchange="window.__renderHistTable()" style="background:#1e293b;border:1px solid rgba(139,92,246,0.25);border-radius:8px;padding:5px 10px;color:#e2e8f0;font-size:12px;cursor:pointer;outline:none;">
+                <option value="all">All Subjects</option>
+              </select>
+            </div>
+            <div id="hist-table-wrap" style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                  <tr style="color:#64748b;text-align:left;">
+                    <th style="padding:8px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">Exam</th>
+                    <th style="padding:8px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Subject</th>
+                    <th style="padding:8px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Date</th>
+                    <th style="padding:8px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Score</th>
+                    <th style="padding:8px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Questions</th>
+                    <th style="padding:8px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px;">Difficulty</th>
+                  </tr>
+                </thead>
+                <tbody id="hist-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- end #dash-history-view -->
+
       </div><!-- end #dash-overlay -->
 
       <div id="root"></div>
@@ -729,7 +801,7 @@
         /* Toggle dashboard overlay — show for dashboard, grades, and profile */
         var overlay = document.getElementById('dash-overlay');
         if (overlay) {
-          if (v === 'dashboard' || v === 'grades' || v === 'profile') {
+          if (v === 'dashboard' || v === 'grades' || v === 'profile' || v === 'exams') {
             overlay.classList.add('dash-visible');
           } else {
             overlay.classList.remove('dash-visible');
@@ -2183,11 +2255,13 @@
         var homeEls   = document.querySelectorAll('[data-dash-home]');
         var gradesEl  = document.getElementById('dash-grades-view');
         var profileEl = document.getElementById('dash-profile-view');
+        var histEl    = document.getElementById('dash-history-view');
         var main      = document.getElementById('app-main');
 
         /* Hide all sub-views first */
         if (gradesEl)  gradesEl.style.display  = 'none';
         if (profileEl) profileEl.style.display = 'none';
+        if (histEl)    histEl.style.display    = 'none';
 
         if (view === 'grades') {
           homeEls.forEach(function (el) { el.style.display = 'none'; });
@@ -2199,11 +2273,230 @@
           if (profileEl) profileEl.style.display = 'flex';
           if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
           window.__buildProfileView();
+        } else if (view === 'exams') {
+          homeEls.forEach(function (el) { el.style.display = 'none'; });
+          if (histEl) histEl.style.display = 'flex';
+          if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+          window.__buildHistoryView();
         } else {
           /* Restore dashboard home */
           homeEls.forEach(function (el) { el.style.display = ''; });
         }
       };
+
+      /* ── Feature 6: Exam History & Analytics ── */
+      (function () {
+        /* Sample exam data — merged with any real localStorage exams */
+        var SAMPLE_EXAMS = [
+          { id:'s1', title:'Biology Final',      subject:'Biology',    date:'2026-03-15', score:88, questions:24, difficulty:'Hard'   },
+          { id:'s2', title:'Calculus Mid-Term',  subject:'Math',       date:'2026-03-10', score:74, questions:30, difficulty:'Hard'   },
+          { id:'s3', title:'World History Quiz', subject:'History',    date:'2026-03-05', score:91, questions:15, difficulty:'Medium' },
+          { id:'s4', title:'Organic Chemistry',  subject:'Chemistry',  date:'2026-02-28', score:65, questions:18, difficulty:'Easy'   },
+          { id:'s5', title:'Physics Lab Exam',   subject:'Physics',    date:'2026-02-20', score:79, questions:20, difficulty:'Medium' },
+          { id:'s6', title:'English Literature', subject:'English',    date:'2026-02-14', score:93, questions:12, difficulty:'Easy'   },
+          { id:'s7', title:'Algebra Final',      subject:'Math',       date:'2026-02-08', score:82, questions:25, difficulty:'Hard'   },
+          { id:'s8', title:'World Geography',    subject:'Geography',  date:'2026-01-30', score:70, questions:16, difficulty:'Medium' }
+        ];
+        var _histRange = 'all';
+
+        function getAllExams() {
+          var exams = SAMPLE_EXAMS.slice();
+          /* Try to read real generated exams from localStorage */
+          ['exams','userExams','generatedExams','savedExams'].forEach(function(k){
+            try {
+              var arr = JSON.parse(localStorage.getItem(k)||'[]');
+              if (!Array.isArray(arr)) return;
+              arr.forEach(function(e,i){
+                if (e && (e.title || e.topic)) {
+                  exams.push({
+                    id: 'real_'+k+'_'+i,
+                    title: e.title || e.topic || 'Exam #'+(i+1),
+                    subject: e.subject || e.topic || 'General',
+                    date: e.date || e.createdAt || new Date().toISOString().slice(0,10),
+                    score: typeof e.score === 'number' ? e.score : Math.floor(Math.random()*30+60),
+                    questions: e.questions ? (Array.isArray(e.questions) ? e.questions.length : e.questions) : 10,
+                    difficulty: e.difficulty || e.level || 'Medium'
+                  });
+                }
+              });
+            } catch(e){}
+          });
+          return exams;
+        }
+
+        function filterByRange(exams, range) {
+          if (range === 'all') return exams;
+          var now = new Date();
+          var cutoff = new Date(now);
+          if (range === 'month') cutoff.setDate(now.getDate() - 30);
+          else if (range === 'week') cutoff.setDate(now.getDate() - 7);
+          return exams.filter(function(e){ return new Date(e.date) >= cutoff; });
+        }
+
+        function drawChart(exams) {
+          var svg = document.getElementById('hist-chart-svg');
+          if (!svg) return;
+          var sorted = exams.slice().sort(function(a,b){ return new Date(a.date)-new Date(b.date); });
+          if (sorted.length < 2) {
+            svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#475569" font-size="13" font-family="Inter">Not enough data to draw chart</text>';
+            return;
+          }
+          var W = svg.parentElement.offsetWidth || 500, H = 160;
+          svg.setAttribute('viewBox','0 0 '+W+' '+H);
+          var pad = { t:10, r:20, b:30, l:40 };
+          var scores = sorted.map(function(e){ return e.score; });
+          var minS = Math.min.apply(null,scores), maxS = Math.max.apply(null,scores);
+          if (maxS === minS) { minS = Math.max(0,minS-10); maxS = Math.min(100,maxS+10); }
+          var scaleX = function(i){ return pad.l + i*(W-pad.l-pad.r)/(sorted.length-1); };
+          var scaleY = function(s){ return pad.t + (H-pad.t-pad.b)*(1-(s-minS)/(maxS-minS)); };
+
+          var html = '';
+          /* Grid lines */
+          [0,25,50,75,100].forEach(function(v){
+            if (v < minS-5 || v > maxS+5) return;
+            var y = scaleY(v);
+            html += '<line x1="'+pad.l+'" y1="'+y+'" x2="'+(W-pad.r)+'" y2="'+y+'" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>';
+            html += '<text x="'+(pad.l-6)+'" y="'+(y+4)+'" text-anchor="end" fill="#475569" font-size="10" font-family="Inter">'+v+'</text>';
+          });
+          /* Gradient fill */
+          var pts = sorted.map(function(e,i){ return scaleX(i)+','+scaleY(e.score); }).join(' ');
+          var fillPts = (pad.l+','+scaleY(minS-5)+' ')+pts+(' '+(W-pad.r)+','+scaleY(minS-5));
+          html += '<defs><linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c3aed" stop-opacity="0.3"/><stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/></linearGradient></defs>';
+          html += '<polygon points="'+fillPts+'" fill="url(#chartGrad)"/>';
+          /* Line */
+          html += '<polyline points="'+pts+'" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+          html += '<defs><linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#db2777"/></linearGradient></defs>';
+          /* Dots + tooltips */
+          sorted.forEach(function(e,i){
+            var cx = scaleX(i), cy = scaleY(e.score);
+            html += '<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="#7c3aed" stroke="#1e1b4b" stroke-width="2"/>';
+            html += '<text x="'+cx+'" y="'+(cy-10)+'" text-anchor="middle" fill="#a78bfa" font-size="11" font-family="Inter" font-weight="700">'+e.score+'%</text>';
+          });
+          /* X-axis date labels */
+          sorted.forEach(function(e,i){
+            if (sorted.length <= 6 || i % Math.ceil(sorted.length/6) === 0) {
+              var lbl = e.date.slice(5); /* MM-DD */
+              html += '<text x="'+scaleX(i)+'" y="'+(H-4)+'" text-anchor="middle" fill="#475569" font-size="10" font-family="Inter">'+lbl+'</text>';
+            }
+          });
+          svg.innerHTML = html;
+        }
+
+        function buildSubjectBars(exams) {
+          var wrap = document.getElementById('hist-subject-bars');
+          if (!wrap) return;
+          var map = {};
+          exams.forEach(function(e){
+            if (!map[e.subject]) map[e.subject] = { total:0, count:0 };
+            map[e.subject].total += e.score; map[e.subject].count++;
+          });
+          var subjs = Object.keys(map).map(function(s){ return { name:s, avg: Math.round(map[s].total/map[s].count), count:map[s].count }; });
+          subjs.sort(function(a,b){ return b.avg-a.avg; });
+          var COLORS = ['#7c3aed','#0ea5e9','#10b981','#f59e0b','#ef4444','#db2777','#8b5cf6','#06b6d4'];
+          wrap.innerHTML = subjs.map(function(s,i){
+            var c = COLORS[i % COLORS.length];
+            return '<div style="display:flex;align-items:center;gap:10px;">'
+              + '<div style="width:90px;flex-shrink:0;font-size:12px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+s.name+'</div>'
+              + '<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:999px;height:8px;overflow:hidden;">'
+              + '<div style="width:'+s.avg+'%;height:100%;background:linear-gradient(90deg,'+c+','+c+'99);border-radius:999px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);"></div>'
+              + '</div>'
+              + '<div style="width:44px;text-align:right;font-size:12px;font-weight:800;color:'+c+';">'+s.avg+'%</div>'
+              + '<div style="width:28px;text-align:right;font-size:11px;color:#475569;">×'+s.count+'</div>'
+              + '</div>';
+          }).join('');
+        }
+
+        window.__renderHistTable = function() {
+          var exams = getAllExams();
+          var diff  = (document.getElementById('hist-filter-diff') || {}).value || 'all';
+          var subj  = (document.getElementById('hist-filter-subj') || {}).value || 'all';
+          if (diff !== 'all') exams = exams.filter(function(e){ return e.difficulty === diff; });
+          if (subj !== 'all') exams = exams.filter(function(e){ return e.subject === subj; });
+          exams = filterByRange(exams, _histRange);
+          var sorted = exams.slice().sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+          var tbody = document.getElementById('hist-table-body');
+          if (!tbody) return;
+          if (sorted.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:#475569;font-size:13px;">No exams match the selected filters.</td></tr>';
+            return;
+          }
+          var DIFF_STYLES = { Easy:'color:#34d399;background:rgba(52,211,153,0.1);', Medium:'color:#fbbf24;background:rgba(251,191,36,0.1);', Hard:'color:#f87171;background:rgba(248,113,113,0.1);' };
+          tbody.innerHTML = sorted.map(function(e, i){
+            var scoreColor = e.score >= 80 ? '#34d399' : e.score >= 60 ? '#fbbf24' : '#f87171';
+            var ds = DIFF_STYLES[e.difficulty] || 'color:#94a3b8;background:rgba(148,163,184,0.1);';
+            return '<tr style="border-top:1px solid rgba(255,255,255,0.04);transition:background 0.15s;" onmouseenter="this.style.background=\'rgba(139,92,246,0.05)\'" onmouseleave="this.style.background=\'none\'">'
+              + '<td style="padding:12px 12px;color:#e2e8f0;font-weight:600;white-space:nowrap;">'+e.title+'</td>'
+              + '<td style="padding:12px 12px;color:#94a3b8;">'+e.subject+'</td>'
+              + '<td style="padding:12px 12px;color:#64748b;font-size:12px;">'+e.date+'</td>'
+              + '<td style="padding:12px 12px;font-weight:800;color:'+scoreColor+';">'+e.score+'%</td>'
+              + '<td style="padding:12px 12px;color:#94a3b8;">'+e.questions+'</td>'
+              + '<td style="padding:12px 12px;"><span style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;'+ds+'">'+e.difficulty+'</span></td>'
+              + '</tr>';
+          }).join('');
+        };
+
+        window.__setHistRange = function(btn, range) {
+          _histRange = range;
+          document.querySelectorAll('.hist-filter-btn').forEach(function(b){
+            b.style.background = 'rgba(255,255,255,0.04)'; b.style.color = '#64748b'; b.style.borderColor = 'rgba(255,255,255,0.1)';
+          });
+          btn.style.background = 'rgba(139,92,246,0.2)'; btn.style.color = '#a78bfa'; btn.style.borderColor = 'rgba(139,92,246,0.4)';
+          window.__buildHistoryView();
+        };
+
+        window.__exportHistoryPDF = function() {
+          var title = document.title;
+          document.title = 'Exam History - Techarja';
+          window.print();
+          document.title = title;
+        };
+
+        window.__buildHistoryView = function() {
+          var allExams = getAllExams();
+          var ranged   = filterByRange(allExams, _histRange);
+          var scores   = ranged.map(function(e){ return e.score; });
+          var avg      = scores.length ? Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length) : 0;
+          var best     = scores.length ? Math.max.apply(null,scores) : 0;
+          var totalQ   = ranged.reduce(function(a,e){ return a+e.questions; }, 0);
+
+          /* Stats row */
+          var statsRow = document.getElementById('hist-stats-row');
+          if (statsRow) {
+            var stats = [
+              { icon:'📝', val: allExams.length, label:'Total Exams',   color:'#a78bfa' },
+              { icon:'🎯', val: avg+'%',          label:'Avg Score',     color:'#34d399' },
+              { icon:'🏆', val: best+'%',         label:'Best Score',    color:'#fbbf24' },
+              { icon:'⚡', val: totalQ,            label:'Questions Done',color:'#38bdf8' }
+            ];
+            statsRow.innerHTML = stats.map(function(s){
+              return '<div class="gcard" style="text-align:center;padding:18px 12px;">'
+                + '<div style="font-size:22px;margin-bottom:4px;">'+s.icon+'</div>'
+                + '<div style="font-size:24px;font-weight:900;color:'+s.color+';">'+s.val+'</div>'
+                + '<div style="font-size:11px;font-weight:700;color:var(--text-muted,#64748b);text-transform:uppercase;letter-spacing:.6px;margin-top:4px;">'+s.label+'</div>'
+                + '</div>';
+            }).join('');
+          }
+
+          /* Subject filter dropdown */
+          var subjSel = document.getElementById('hist-filter-subj');
+          if (subjSel) {
+            var subjects = [];
+            allExams.forEach(function(e){ if (subjects.indexOf(e.subject) === -1) subjects.push(e.subject); });
+            var cur = subjSel.value;
+            subjSel.innerHTML = '<option value="all">All Subjects</option>'
+              + subjects.map(function(s){ return '<option value="'+s+'"'+(s===cur?' selected':'')+'>'+s+'</option>'; }).join('');
+          }
+
+          /* Chart */
+          setTimeout(function(){ drawChart(ranged); }, 50);
+
+          /* Subject bars */
+          buildSubjectBars(ranged);
+
+          /* Table */
+          window.__renderHistTable();
+        };
+      })();
 
       /* ── Feature 3: Notifications Panel ── */
       (function () {
