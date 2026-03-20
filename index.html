@@ -2962,15 +2962,15 @@
       window.__shellNav = function (el, view) {
         var result = _navPrev ? _navPrev.call(window, el, view) : false;
 
-        /* Force overlay back on */
+        var v = (el && el.getAttribute && el.getAttribute('data-view')) || view || 'dashboard';
+
+        /* Force overlay back on — but NOT for settings (needs React modal) */
         var overlay = document.getElementById('dash-overlay');
-        if (overlay) overlay.classList.add('dash-visible');
+        if (overlay && v !== 'settings') overlay.classList.add('dash-visible');
 
         /* Hide the back-to-dash button */
         var backBtn = document.getElementById('back-to-dash-btn');
         if (backBtn) backBtn.style.display = 'none';
-
-        var v = (el && el.getAttribute && el.getAttribute('data-view')) || view || 'dashboard';
 
         /* Toggle between grades view and dashboard home */
         if (window.__showDashView) window.__showDashView(v);
