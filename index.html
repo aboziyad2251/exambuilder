@@ -713,6 +713,12 @@
       }
 
       window.__cycleTheme = cycleTheme;
+      /* Expose applyTheme so the React bundle can restore theme from DB on login */
+      window.__applyThemeFromDB = function(key) {
+        if (key && key !== localStorage.getItem('colorTheme')) {
+          applyTheme(key);
+        }
+      };
       applyTheme(localStorage.getItem('colorTheme') || window.__currentTheme || 'dark');
 
       window.addEventListener('storage', function (e) {
