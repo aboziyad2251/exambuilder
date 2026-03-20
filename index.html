@@ -109,7 +109,7 @@
           <span class="s-nav-label" data-i18n="navCourses">Courses</span>
         </a>
 
-        <a class="s-nav-item" data-view="exams" href="#" aria-label="My Exams" onclick="return window.__shellNav(this)">
+        <a class="s-nav-item" data-view="exams" href="#" aria-label="My Exams" onclick="document.querySelectorAll('.s-nav-item').forEach(function(n){n.classList.remove('s-active')});this.classList.add('s-active');var o=document.getElementById('dash-overlay');if(o)o.classList.add('dash-visible');if(window.__showDashView)window.__showDashView('exams');return false;">
           <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14,2 14,8 20,8"/>
@@ -153,7 +153,7 @@
           <span class="s-nav-label" data-i18n="navSettings">Settings</span>
         </a>
 
-        <a class="s-nav-item" data-view="profile" href="#" aria-label="Profile" onclick="return window.__shellNav(this)">
+        <a class="s-nav-item" data-view="profile" href="#" aria-label="Profile" onclick="document.querySelectorAll('.s-nav-item').forEach(function(n){n.classList.remove('s-active')});this.classList.add('s-active');var o=document.getElementById('dash-overlay');if(o)o.classList.add('dash-visible');if(window.__showDashView)window.__showDashView('profile');return false;">
           <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
