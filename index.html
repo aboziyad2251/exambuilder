@@ -52,8 +52,8 @@
   }
 }
   </script>
-  <script type="module" crossorigin src="/assets/index-DyN3VeGQ.js?v=2"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DJSVmgVU.css?v=10">
+  <script type="module" crossorigin src="/assets/index-DyN3VeGQ.js?v=3"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DJSVmgVU.css?v=13">
 </head>
 
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
@@ -153,6 +153,23 @@
           <span class="s-nav-label" data-i18n="navSettings">Settings</span>
         </a>
 
+        <a class="s-nav-item" data-view="profile" href="#" aria-label="Profile" onclick="return window.__shellNav(this, 'settings')">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="s-nav-label" data-i18n="navProfile">Profile</span>
+        </a>
+
+        <a class="s-nav-item" href="#" aria-label="Log Out" onclick="return window.__logOut()">
+          <svg class="s-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ef4444;">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span class="s-nav-label" data-i18n="navLogOut" style="color: #ef4444;">Log Out</span>
+        </a>
+
       </nav><!-- end #sidebar-nav -->
 
       <div style="flex:1;min-height:12px;"></div>
@@ -220,12 +237,20 @@
 
         <!-- Greeting Header -->
         <div id="dash-header">
-          <h1 id="dash-greeting">Good morning, Scholar 👋</h1>
-          <p id="dash-subtitle" data-i18n="dashSubtitle">Ready to build today's exam?</p>
+          <div>
+            <h1 id="dash-greeting">Good morning, Scholar 👋</h1>
+            <p id="dash-subtitle" data-i18n="dashSubtitle">Ready to build today's exam?</p>
+          </div>
+          <button id="create-exam-btn" aria-label="Open Exam Builder" onclick="window.__openExamBuilder()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span data-i18n="createExamBtn">Create Exam</span>
+          </button>
         </div>
 
         <!-- Stats Row -->
-        <div id="dash-stats">
+        <div id="dash-stats" data-dash-home>
           <div class="stat-card">
             <div class="stat-icon" style="background:rgba(139,92,246,0.20);">📝</div>
             <div class="stat-value" id="stat-total-exams">0</div>
@@ -253,7 +278,7 @@
         </div>
 
         <!-- Score History Chart (Analysis) -->
-        <div id="dash-perf-section">
+        <div id="dash-perf-section" data-dash-home>
           <div class="dash-section-hd">
             <h2 class="dash-section-title" data-i18n="sectionScoreHistory">Score History</h2>
             <span class="dash-see-all" data-i18n="sectionScoreHistoryMeta" style="cursor:default;pointer-events:none;">Last 8 exams</span>
@@ -262,7 +287,7 @@
         </div>
 
         <!-- Recent Exams Cards -->
-        <div id="dash-courses-section">
+        <div id="dash-courses-section" data-dash-home>
           <div class="dash-section-hd">
             <h2 class="dash-section-title" data-i18n="sectionRecentExams">Recent Exams</h2>
             <button class="dash-see-all" data-i18n="seeAll" onclick="window.__shellNav(null,'exams')">See all →</button>
@@ -271,13 +296,112 @@
         </div>
 
         <!-- My Exams Table -->
-        <div id="dash-exams-section">
+        <div id="dash-exams-section" data-dash-home>
           <div class="dash-section-hd">
             <h2 class="dash-section-title" data-i18n="sectionMyExams">My Exams</h2>
             <button class="dash-see-all" data-i18n="viewAll" onclick="window.__shellNav(null,'exams')">View all →</button>
           </div>
           <div id="dash-exams-table"><!-- built by JS --></div>
         </div>
+
+        <!-- ── GRADES VIEW (hidden by default) ── -->
+        <div id="dash-grades-view" style="display:none;flex-direction:column;gap:26px;">
+
+          <!-- Grades page header -->
+          <div id="grades-page-header">
+            <div>
+              <h1 id="grades-page-title" class="dash-section-title" style="font-size:24px;" data-i18n="gradesPageTitle">My Grades</h1>
+              <p id="grades-page-sub" data-i18n="gradesPageSub">Academic performance overview</p>
+            </div>
+            <button class="dash-see-all" onclick="window.__shellNav(null,'dashboard')" data-i18n="backHome" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);cursor:pointer;font-family:Inter,sans-serif;">← Dashboard</button>
+          </div>
+
+          <!-- GPA + stat cards -->
+          <div id="grades-stats-row"><!-- built by JS --></div>
+
+          <!-- Grade distribution -->
+          <div id="grades-dist-section">
+            <div class="dash-section-hd">
+              <h2 class="dash-section-title" data-i18n="gradeDistTitle">Grade Distribution</h2>
+            </div>
+            <div id="grades-dist-bars"><!-- built by JS --></div>
+          </div>
+
+          <!-- Subjects table -->
+          <div id="grades-table-section">
+            <div class="dash-section-hd">
+              <h2 class="dash-section-title" data-i18n="allSubjectsTitle">All Subjects</h2>
+              <span class="dash-see-all" style="cursor:default;pointer-events:none;" data-i18n="gradesSubjectCount">8 subjects</span>
+            </div>
+            <div id="grades-subjects-table"><!-- built by JS --></div>
+          </div>
+
+        </div><!-- end #dash-grades-view -->
+
+        <!-- ══ PROFILE PAGE ══ -->
+        <div id="dash-profile-view" style="display:none;flex-direction:column;gap:26px;">
+
+          <!-- Header -->
+          <div id="profile-page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <h1 class="dash-section-title" style="font-size:24px;">My Profile</h1>
+              <p style="color:var(--text-muted,#94a3b8);font-size:13px;margin:4px 0 0;">Manage your personal information</p>
+            </div>
+            <button onclick="window.__shellNav(null,'dashboard')" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);cursor:pointer;font-family:Inter,sans-serif;color:inherit;font-size:13px;">← Dashboard</button>
+          </div>
+
+          <!-- Hero card -->
+          <div id="profile-hero-card" style="background:linear-gradient(135deg,rgba(139,92,246,0.18) 0%,rgba(236,72,153,0.12) 100%);border:1px solid rgba(139,92,246,0.25);border-radius:20px;padding:32px 28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+            <div id="profile-hero-avatar" style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#db2777);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 0 0 4px rgba(139,92,246,0.3);">S</div>
+            <div style="flex:1;min-width:160px;">
+              <h2 id="profile-hero-name" style="font-size:22px;font-weight:800;margin:0 0 4px;">Scholar</h2>
+              <p id="profile-hero-occupation" style="color:#a78bfa;font-size:14px;font-weight:600;margin:0 0 6px;"></p>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <span id="profile-hero-edu" style="background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:#c4b5fd;"></span>
+                <span id="profile-hero-status" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:#86efac;"></span>
+              </div>
+            </div>
+            <button onclick="window.__shellNav(null,'settings')" style="padding:10px 20px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">✏️ Edit Profile</button>
+          </div>
+
+          <!-- Info grid -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+
+            <div class="gcard" style="display:flex;flex-direction:column;gap:8px;padding:20px;">
+              <div style="font-size:22px;">👤</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;">Full Name</div>
+              <div id="pinfo-name" style="font-size:15px;font-weight:700;">—</div>
+            </div>
+
+            <div class="gcard" style="display:flex;flex-direction:column;gap:8px;padding:20px;">
+              <div style="font-size:22px;">💼</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;">Occupation</div>
+              <div id="pinfo-occupation" style="font-size:15px;font-weight:700;">—</div>
+            </div>
+
+            <div class="gcard" style="display:flex;flex-direction:column;gap:8px;padding:20px;">
+              <div style="font-size:22px;">🎓</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;">Education Level</div>
+              <div id="pinfo-edu" style="font-size:15px;font-weight:700;">—</div>
+            </div>
+
+            <div class="gcard" style="display:flex;flex-direction:column;gap:8px;padding:20px;">
+              <div style="font-size:22px;">🏷️</div>
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;">Employment Status</div>
+              <div id="pinfo-status" style="font-size:15px;font-weight:700;">—</div>
+            </div>
+
+          </div>
+
+          <!-- Activity stats row -->
+          <div id="profile-stats-section">
+            <div class="dash-section-hd">
+              <h2 class="dash-section-title">Activity Overview</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;" id="profile-activity-row"><!-- built by JS --></div>
+          </div>
+
+        </div><!-- end #dash-profile-view -->
 
       </div><!-- end #dash-overlay -->
 
@@ -299,9 +423,10 @@
       </div>
 
       <!-- Profile Card -->
-      <div id="right-profile-card">
+      <div id="right-profile-card" onclick="window.__shellNav(null,'profile')" style="cursor:pointer;" title="View full profile">
         <div id="right-avatar-ring">S</div>
         <h3 id="right-profile-name">Scholar</h3>
+        <span id="right-profile-occupation" style="display:none;font-size:0.75rem;color:var(--text-muted,#a78bfa);font-weight:600;margin-top:2px;"></span>
         <span id="right-profile-level">Elementary</span>
       </div>
 
@@ -332,6 +457,74 @@
     </aside><!-- end #app-right-panel -->
 
   </div><!-- end #app-shell -->
+
+  <!-- ═══ CALENDAR DAY VIEW MODAL ═══ -->
+  <div id="cal-day-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(2,6,23,0.85);backdrop-filter:blur(8px);overflow-y:auto;" onclick="if(event.target===this)window.__closeDayModal()">
+    <div style="max-width:560px;margin:40px auto;padding:0 16px 60px;">
+
+      <!-- Modal header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <h2 id="cal-day-modal-title" style="font-size:22px;font-weight:800;color:#fff;margin:0;"></h2>
+          <p id="cal-day-modal-sub" style="color:#a78bfa;font-size:13px;margin:4px 0 0;font-weight:600;"></p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button onclick="window.__openAddEvent()" style="padding:8px 16px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">+ Add Event</button>
+          <button onclick="window.__closeDayModal()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:#94a3b8;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+        </div>
+      </div>
+
+      <!-- 24-hour timeline -->
+      <div id="cal-day-timeline" style="position:relative;"></div>
+
+    </div>
+  </div>
+
+  <!-- ═══ CALENDAR EVENT EDITOR MODAL ═══ -->
+  <div id="cal-event-modal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(2,6,23,0.90);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)window.__closeEventModal()">
+    <div style="width:100%;max-width:420px;background:#0f172a;border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:28px;box-shadow:0 0 60px rgba(139,92,246,0.2);">
+      <h3 id="cal-event-modal-title" style="font-size:18px;font-weight:800;color:#fff;margin:0 0 20px;"></h3>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Event Title</label>
+          <input id="cef-title" type="text" placeholder="e.g. Study Session, Exam..." style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;outline:none;box-sizing:border-box;" />
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Start Time</label>
+            <select id="cef-hour" style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;outline:none;"></select>
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Duration</label>
+            <select id="cef-duration" style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;outline:none;">
+              <option value="0.5">30 min</option>
+              <option value="1" selected>1 hour</option>
+              <option value="1.5">1.5 hours</option>
+              <option value="2">2 hours</option>
+              <option value="3">3 hours</option>
+              <option value="4">4 hours</option>
+              <option value="6">6 hours</option>
+              <option value="8">8 hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Color</label>
+          <div id="cef-colors" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:22px;">
+        <button id="cef-delete-btn" onclick="window.__deleteCalEvent()" style="display:none;padding:10px 18px;border-radius:10px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-weight:700;font-size:13px;cursor:pointer;">Delete</button>
+        <div style="flex:1;"></div>
+        <button onclick="window.__closeEventModal()" style="padding:10px 18px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;font-weight:700;font-size:13px;cursor:pointer;">Cancel</button>
+        <button onclick="window.__saveCalEvent()" style="padding:10px 22px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">Save</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Hidden exam-modes-guide — DOM elements kept for localization script -->
   <div id="exam-modes-guide" style="display:none!important;" aria-hidden="true">
@@ -470,27 +663,56 @@
           document.querySelectorAll('.s-nav-item').forEach(function (n) { n.classList.remove('s-active'); });
           el.classList.add('s-active');
         }
-        /* Toggle dashboard overlay */
+        var v = view || 'dashboard';
+        /* Toggle dashboard overlay — show for dashboard, grades, and profile */
         var overlay = document.getElementById('dash-overlay');
         if (overlay) {
-          if ((view || 'dashboard') === 'dashboard') {
+          if (v === 'dashboard' || v === 'grades' || v === 'profile') {
             overlay.classList.add('dash-visible');
           } else {
             overlay.classList.remove('dash-visible');
           }
         }
-        window.dispatchEvent(new CustomEvent('shell:navigate', { detail: { view: view || 'dashboard' } }));
+        window.dispatchEvent(new CustomEvent('shell:navigate', { detail: { view: v } }));
         return false;
       };
 
-      /* ── 2. Mini Calendar ── */
+      /* ── 2. Calendar with Events ── */
       var calDate = new Date();
       var MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var DAYS_SHORT = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+      var CAL_COLORS = ['#7c3aed','#db2777','#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
 
+      /* ── Event storage helpers ── */
+      function calEventsKey(y, m, d) { return 'calEv_' + y + '_' + (m+1) + '_' + d; }
+      function loadDayEvents(y, m, d) {
+        try { return JSON.parse(localStorage.getItem(calEventsKey(y,m,d)) || '[]'); } catch(e) { return []; }
+      }
+      function saveDayEvents(y, m, d, evts) {
+        localStorage.setItem(calEventsKey(y,m,d), JSON.stringify(evts));
+      }
+
+      /* ── Render mini calendar ── */
       function renderCalendar() {
         var y = calDate.getFullYear(), m = calDate.getMonth();
         var label = document.getElementById('cal-month-year');
         if (label) label.textContent = MONTHS[m] + ' ' + y;
+
+        /* Fix RTL reversing — force LTR on calendar */
+        var calCard = document.getElementById('right-calendar-card');
+        if (calCard) calCard.style.direction = 'ltr';
+
+        /* Rebuild day labels in correct order */
+        var hdr = document.getElementById('cal-days-header');
+        if (hdr) {
+          hdr.innerHTML = '';
+          DAYS_SHORT.forEach(function(lbl) {
+            var el = document.createElement('div');
+            el.className = 'cal-day-label';
+            el.textContent = lbl;
+            hdr.appendChild(el);
+          });
+        }
 
         var grid = document.getElementById('cal-grid');
         if (!grid) return;
@@ -498,41 +720,242 @@
 
         var today = new Date();
         var todayY = today.getFullYear(), todayM = today.getMonth(), todayD = today.getDate();
-        var firstDay    = new Date(y, m,     1).getDay();
+        var firstDay    = new Date(y, m, 1).getDay();
         var daysInMonth = new Date(y, m + 1, 0).getDate();
-        var daysInPrev  = new Date(y, m,     0).getDate();
+        var daysInPrev  = new Date(y, m, 0).getDate();
 
-        function cell(txt, cls, hasExam) {
-          var d = document.createElement('div');
-          d.className = 'cal-cell' + (cls ? ' ' + cls : '') + (hasExam ? ' cal-has-exam' : '');
-          d.textContent = txt;
-          if (hasExam) {
+        function makeCell(txt, cls, evtCount, dayNum, isCurrentMonth) {
+          var el = document.createElement('div');
+          el.className = 'cal-cell' + (cls ? ' '+cls : '') + (evtCount > 0 ? ' cal-has-exam' : '');
+          el.textContent = txt;
+          if (evtCount > 0) {
             var dot = document.createElement('div');
             dot.className = 'cal-exam-dot';
-            d.appendChild(dot);
+            el.appendChild(dot);
           }
-          return d;
+          if (isCurrentMonth && dayNum) {
+            el.style.cursor = 'pointer';
+            (function(dy){ el.addEventListener('click', function(e){ e.stopPropagation(); window.__openDayView(y, m, dy); }); })(dayNum);
+          }
+          return el;
         }
 
         /* Prev month filler */
-        for (var d = firstDay - 1; d >= 0; d--) grid.appendChild(cell(daysInPrev - d, 'cal-other-month', false));
+        for (var f = firstDay - 1; f >= 0; f--) grid.appendChild(makeCell(daysInPrev - f, 'cal-other-month', 0, null, false));
 
         /* Current month */
         for (var d = 1; d <= daysInMonth; d++) {
           var isToday = (d === todayD && m === todayM && y === todayY);
-          var examKey = y + '-' + (m + 1) + '-' + d;
+          var examKey = y + '-' + (m+1) + '-' + d;
           var hasExam = !!(window.__examDates && window.__examDates[examKey]);
-          grid.appendChild(cell(d, isToday ? 'cal-today' : '', hasExam));
+          var evts    = loadDayEvents(y, m, d);
+          var dotCount = evts.length + (hasExam ? 1 : 0);
+          grid.appendChild(makeCell(d, isToday ? 'cal-today' : '', dotCount, d, true));
         }
 
         /* Next month filler */
         var filled = firstDay + daysInMonth;
         var remain = filled % 7 === 0 ? 0 : 7 - (filled % 7);
-        for (var d = 1; d <= remain; d++) grid.appendChild(cell(d, 'cal-other-month', false));
+        for (var r = 1; r <= remain; r++) grid.appendChild(makeCell(r, 'cal-other-month', 0, null, false));
       }
 
       window.__calPrev = function () { calDate.setMonth(calDate.getMonth() - 1); renderCalendar(); };
       window.__calNext = function () { calDate.setMonth(calDate.getMonth() + 1); renderCalendar(); };
+
+      /* ── Day view ── */
+      var _calViewDate = { y: 0, m: 0, d: 0 };
+      window.__openDayView = function(y, m, d) {
+        _calViewDate = { y:y, m:m, d:d };
+        var modal = document.getElementById('cal-day-modal');
+        var title = document.getElementById('cal-day-modal-title');
+        var sub   = document.getElementById('cal-day-modal-sub');
+        var date  = new Date(y, m, d);
+        var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        if (title) title.textContent = MONTHS[m] + ' ' + d + ', ' + y;
+        if (sub)   sub.textContent   = dayNames[date.getDay()];
+        if (modal) { modal.style.display = 'block'; document.body.style.overflow = 'hidden'; }
+        window.__renderDayTimeline(y, m, d);
+      };
+
+      window.__closeDayModal = function() {
+        var modal = document.getElementById('cal-day-modal');
+        if (modal) modal.style.display = 'none';
+        document.body.style.overflow = '';
+      };
+
+      window.__renderDayTimeline = function(y, m, d) {
+        var timeline = document.getElementById('cal-day-timeline');
+        if (!timeline) return;
+        var evts = loadDayEvents(y, m, d);
+        var now  = new Date();
+        var isToday = (y===now.getFullYear() && m===now.getMonth() && d===now.getDate());
+        var currentHour = now.getHours() + now.getMinutes()/60;
+
+        var html = '';
+        var HOUR_H = 64; /* px per hour */
+
+        for (var h = 0; h < 24; h++) {
+          var timeLabel = h === 0 ? '12 AM' : h < 12 ? h+' AM' : h === 12 ? '12 PM' : (h-12)+' PM';
+          var isCurrentHour = isToday && Math.floor(currentHour) === h;
+
+          html += '<div style="display:flex;gap:0;min-height:'+HOUR_H+'px;position:relative;">';
+          /* Time label */
+          html += '<div style="width:52px;flex-shrink:0;padding-top:10px;text-align:right;padding-right:12px;font-size:11px;font-weight:700;color:'+(isCurrentHour?'#a78bfa':'rgba(148,163,184,0.6)')+';user-select:none;">'+timeLabel+'</div>';
+          /* Hour lane */
+          html += '<div style="flex:1;border-top:1px solid rgba(255,255,255,0.05);position:relative;min-height:'+HOUR_H+'px;cursor:pointer;" onclick="window.__openAddEvent('+h+')" title="Add event at '+timeLabel+'">';
+
+          /* Current time indicator */
+          if (isCurrentHour) {
+            var pct = (currentHour - h) * 100;
+            html += '<div style="position:absolute;left:0;right:0;top:'+pct+'%;height:2px;background:linear-gradient(90deg,#7c3aed,#db2777);z-index:2;border-radius:2px;"><div style="width:8px;height:8px;background:#db2777;border-radius:50%;margin-top:-3px;margin-left:-4px;"></div></div>';
+          }
+
+          /* Events in this hour */
+          evts.forEach(function(ev, idx) {
+            var evH = Math.floor(ev.hour);
+            var evMin = (ev.hour - evH) * 60;
+            if (evH !== h) return;
+            var top = (evMin / 60) * HOUR_H;
+            var height = Math.max(28, ev.duration * HOUR_H - 4);
+            var color  = ev.color || '#7c3aed';
+            html += '<div onclick="event.stopPropagation();window.__openEditEvent(\''+ev.id+'\')" '
+              + 'style="position:absolute;left:6px;right:6px;top:'+top+'px;height:'+height+'px;'
+              + 'background:'+color+'22;border-left:3px solid '+color+';border-radius:0 8px 8px 0;'
+              + 'padding:4px 8px;cursor:pointer;z-index:3;overflow:hidden;'
+              + 'transition:background 0.15s;" '
+              + 'onmouseenter="this.style.background=\''+color+'44\'" onmouseleave="this.style.background=\''+color+'22\'">'
+              + '<div style="font-size:12px;font-weight:700;color:'+color+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ev.title+'</div>'
+              + '<div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:1px;">'
+              + _fmtHour(ev.hour)+' – '+_fmtHour(ev.hour+ev.duration)
+              + ' ('+_fmtDuration(ev.duration)+')</div>'
+              + '</div>';
+          });
+
+          html += '</div></div>';
+        }
+        timeline.innerHTML = html;
+
+        /* Scroll to 7am or current hour */
+        var scrollTo = isToday ? Math.max(0, Math.floor(currentHour) - 1) : 7;
+        setTimeout(function(){
+          var modal = document.getElementById('cal-day-modal');
+          if (modal) modal.scrollTo({ top: scrollTo * HOUR_H + 100, behavior: 'smooth' });
+        }, 50);
+      };
+
+      function _fmtHour(h) {
+        h = h % 24;
+        var hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+        var ampm = hh < 12 ? 'AM' : 'PM';
+        var disp = hh % 12 || 12;
+        return disp + (mm > 0 ? ':' + (mm < 10 ? '0'+mm : mm) : '') + ' ' + ampm;
+      }
+      function _fmtDuration(d) {
+        if (d < 1) return Math.round(d*60)+' min';
+        if (d === 1) return '1 hr';
+        var h = Math.floor(d), m = Math.round((d-h)*60);
+        return h + (m>0?' hr '+m+' min':' hrs');
+      }
+
+      /* ── Event editor ── */
+      var _editingEventId = null;
+
+      window.__openAddEvent = function(hour) {
+        _editingEventId = null;
+        hour = (typeof hour === 'number') ? hour : new Date().getHours();
+        document.getElementById('cef-title').value = '';
+        document.getElementById('cef-hour').value  = hour;
+        document.getElementById('cef-duration').value = '1';
+        document.getElementById('cef-delete-btn').style.display = 'none';
+        document.getElementById('cal-event-modal-title').textContent = 'New Event';
+        _buildColorPicker(CAL_COLORS[0]);
+        _buildHourSelect(hour);
+        var m = document.getElementById('cal-event-modal');
+        if (m) { m.style.display = 'flex'; }
+      };
+
+      window.__openEditEvent = function(id) {
+        var evts = loadDayEvents(_calViewDate.y, _calViewDate.m, _calViewDate.d);
+        var ev   = evts.find(function(e){ return e.id === id; });
+        if (!ev) return;
+        _editingEventId = id;
+        document.getElementById('cef-title').value    = ev.title;
+        document.getElementById('cef-duration').value = String(ev.duration);
+        document.getElementById('cef-delete-btn').style.display = '';
+        document.getElementById('cal-event-modal-title').textContent = 'Edit Event';
+        _buildHourSelect(ev.hour);
+        _buildColorPicker(ev.color || CAL_COLORS[0]);
+        var m = document.getElementById('cal-event-modal');
+        if (m) { m.style.display = 'flex'; }
+      };
+
+      window.__closeEventModal = function() {
+        var m = document.getElementById('cal-event-modal');
+        if (m) m.style.display = 'none';
+      };
+
+      window.__saveCalEvent = function() {
+        var title    = (document.getElementById('cef-title').value || '').trim();
+        var hour     = parseFloat(document.getElementById('cef-hour').value);
+        var duration = parseFloat(document.getElementById('cef-duration').value);
+        var color    = (document.querySelector('#cef-colors .cef-color-sel') || {}).getAttribute('data-color') || CAL_COLORS[0];
+        if (!title) { document.getElementById('cef-title').style.borderColor = '#ef4444'; return; }
+        document.getElementById('cef-title').style.borderColor = '';
+
+        var v = _calViewDate;
+        var evts = loadDayEvents(v.y, v.m, v.d);
+        if (_editingEventId) {
+          evts = evts.map(function(e){ return e.id === _editingEventId ? {id:e.id,title:title,hour:hour,duration:duration,color:color} : e; });
+        } else {
+          evts.push({ id: Date.now().toString(36), title:title, hour:hour, duration:duration, color:color });
+        }
+        saveDayEvents(v.y, v.m, v.d, evts);
+        window.__closeEventModal();
+        window.__renderDayTimeline(v.y, v.m, v.d);
+        renderCalendar();
+      };
+
+      window.__deleteCalEvent = function() {
+        if (!_editingEventId) return;
+        var v = _calViewDate;
+        var evts = loadDayEvents(v.y, v.m, v.d).filter(function(e){ return e.id !== _editingEventId; });
+        saveDayEvents(v.y, v.m, v.d, evts);
+        window.__closeEventModal();
+        window.__renderDayTimeline(v.y, v.m, v.d);
+        renderCalendar();
+      };
+
+      function _buildHourSelect(sel) {
+        var el = document.getElementById('cef-hour');
+        if (!el) return;
+        el.innerHTML = '';
+        for (var h = 0; h < 24; h++) {
+          var opt = document.createElement('option');
+          opt.value = h;
+          opt.textContent = _fmtHour(h);
+          if (h === Math.floor(sel)) opt.selected = true;
+          el.appendChild(opt);
+        }
+      }
+
+      function _buildColorPicker(selected) {
+        var el = document.getElementById('cef-colors');
+        if (!el) return;
+        el.innerHTML = '';
+        CAL_COLORS.forEach(function(c) {
+          var btn = document.createElement('button');
+          btn.setAttribute('data-color', c);
+          btn.className = 'cef-color-btn' + (c === selected ? ' cef-color-sel' : '');
+          btn.style.cssText = 'width:26px;height:26px;border-radius:50%;background:'+c+';border:3px solid '+(c===selected?'#fff':'transparent')+';cursor:pointer;transition:border 0.15s;';
+          btn.onclick = function() {
+            document.querySelectorAll('#cef-colors .cef-color-btn').forEach(function(b){
+              b.style.border = '3px solid transparent'; b.classList.remove('cef-color-sel');
+            });
+            btn.style.border = '3px solid #fff'; btn.classList.add('cef-color-sel');
+          };
+          el.appendChild(btn);
+        });
+      }
 
       /* ── 3. SVG Progress Rings ── */
       function makeRing(pct, strokeStyle) {
@@ -584,13 +1007,32 @@
         });
       }
 
-      /* ── 4. Dashboard Greeting ── */
+      /* ── 4. Dashboard Greeting & Logout ── */
       (function () {
         var h = new Date().getHours();
         var greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
         var el = document.getElementById('dash-greeting');
         if (el) el.textContent = greet + ', Scholar 👋';
       })();
+
+      window.__logOut = function () {
+        if (confirm("Are you sure you want to log out?")) {
+          // Fire event just in case React is listening
+          window.dispatchEvent(new CustomEvent('shell:logout'));
+          
+          // Clear Supabase, Clerk, and generic auth tokens
+          for(var i = localStorage.length - 1; i >= 0; i--) {
+            var key = localStorage.key(i);
+            if (key && (key.startsWith('sb-') || key.includes('clerk') || key.includes('auth') || key.includes('token'))) {
+              localStorage.removeItem(key);
+            }
+          }
+          
+          // Force page reload
+          window.location.reload();
+        }
+        return false;
+      };
 
       /* ── 5. Course Cards ── */
       (function () {
@@ -704,10 +1146,12 @@
       (function () {
         var STR_KEYS  = ['userName', 'user_name', 'displayName', 'name', 'fullName'];
         var JSON_KEYS = ['user', 'userProfile', 'profile', 'authUser', 'currentUser'];
-        var LEVEL_KEYS= ['userLevel', 'level', 'grade'];
+        var LEVEL_KEYS= ['userEduLevel', 'userLevel', 'level', 'grade'];
+        var EDU_LABELS = { elementary: 'Elementary', middle: 'Middle School', high: 'High School', university: 'University', postgrad: 'Postgraduate',
+                           ابتدائي: 'Elementary', متوسط: 'Middle School', ثانوي: 'High School', جامعي: 'University' };
 
         function readProfile() {
-          var name = null, level = null;
+          var name = null, level = null, occupation = null;
 
           /* Try flat string keys */
           for (var i = 0; i < STR_KEYS.length; i++) {
@@ -734,7 +1178,9 @@
               if (lv) { level = lv; break; }
             }
           }
-          return { name: name, level: level };
+          /* Read occupation saved by profile modal */
+          occupation = localStorage.getItem('userOccupation') || null;
+          return { name: name, level: level, occupation: occupation };
         }
 
         function applyProfile(data) {
@@ -742,6 +1188,7 @@
           var avatar  = document.getElementById('right-avatar-ring');
           var nameEl  = document.getElementById('right-profile-name');
           var levelEl = document.getElementById('right-profile-level');
+          var occEl   = document.getElementById('right-profile-occupation');
           var greetEl = document.getElementById('dash-greeting');
 
           var initial   = data.name.charAt(0).toUpperCase();
@@ -750,11 +1197,20 @@
           if (avatar && avatar.textContent !== initial) {
             avatar.textContent = initial;
             avatar.classList.remove('profile-just-updated');
-            void avatar.offsetWidth; /* reflow to retrigger animation */
+            void avatar.offsetWidth;
             avatar.classList.add('profile-just-updated');
           }
-          if (nameEl)  nameEl.textContent  = data.name;
-          if (levelEl && data.level) levelEl.textContent = data.level;
+          if (nameEl) nameEl.textContent = data.name;
+
+          /* Show education level (pretty label) */
+          if (levelEl && data.level) {
+            levelEl.textContent = EDU_LABELS[data.level] || data.level;
+          }
+          /* Show occupation below name */
+          if (occEl) {
+            occEl.textContent = data.occupation || '';
+            occEl.style.display = data.occupation ? '' : 'none';
+          }
 
           if (greetEl) {
             var h = new Date().getHours();
@@ -768,7 +1224,7 @@
 
         /* Watch for changes from React app (cross-tab or post-login) */
         window.addEventListener('storage', function (e) {
-          if (STR_KEYS.indexOf(e.key) > -1 || JSON_KEYS.indexOf(e.key) > -1 || LEVEL_KEYS.indexOf(e.key) > -1) {
+          if (STR_KEYS.indexOf(e.key) > -1 || JSON_KEYS.indexOf(e.key) > -1 || LEVEL_KEYS.indexOf(e.key) > -1 || e.key === 'userOccupation' || e.key === 'userEduLevel') {
             applyProfile(readProfile());
           }
         });
@@ -777,7 +1233,7 @@
         var _lastProfileSig = '';
         setInterval(function () {
           var d = readProfile();
-          var sig = (d.name || '') + '|' + (d.level || '');
+          var sig = (d.name || '') + '|' + (d.level || '') + '|' + (d.occupation || '');
           if (sig !== _lastProfileSig) { _lastProfileSig = sig; applyProfile(d); }
         }, 2500);
       })();
@@ -841,7 +1297,19 @@
         window.__shellNav(null, 'exams');
       };
       document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') window.__closeQuickGen();
+        if (e.key === 'Escape') {
+          window.__closeQuickGen();
+          window.__closeEventModal();
+          window.__closeDayModal();
+        }
+      });
+
+      /* Enter key saves event form */
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          var em = document.getElementById('cal-event-modal');
+          if (em && em.style.display === 'flex') { e.preventDefault(); window.__saveCalEvent(); }
+        }
       });
 
       /* ── Init ── */
@@ -1057,7 +1525,16 @@
         greetMorning: 'Good morning', greetAfternoon: 'Good afternoon', greetEvening: 'Good evening',
         greetSep: ', ',
         langToggleLabel: 'AR', langToggleBadge: '\u0639\u0631\u0628\u064a',
-        langToggleTip: 'Switch to Arabic / \u0627\u0644\u0639\u0631\u0628\u064a\u0629'
+        langToggleTip: 'Switch to Arabic / \u0627\u0644\u0639\u0631\u0628\u064a\u0629',
+        gradesPageTitle: 'My Grades', gradesPageSub: 'Academic performance overview',
+        backHome: '\u2190 Dashboard',
+        gpaLabel: 'GPA', gpaCardSub: 'Out of 4.0',
+        passedLabel: 'Passed', failedLabel: 'Failed', avgScoreLabel: 'Avg Score',
+        passedSub: 'subjects', failedSub: 'subjects', avgScoreSub: 'this semester',
+        gradeDistTitle: 'Grade Distribution',
+        allSubjectsTitle: 'All Subjects', gradesSubjectCount: '8 subjects',
+        gradeColSubject: 'Subject', gradeColScore: 'Score', gradeColExams: 'Exams', gradeColGrade: 'Grade', gradeColStatus: 'Status',
+        gradePass: 'Pass', gradeFail: 'Fail'
       },
       ar: {
         dashSubtitle: '\u0647\u0644 \u0623\u0646\u062a \u0645\u0633\u062a\u0639\u062f \u0644\u0628\u0646\u0627\u0621 \u0627\u0645\u062a\u062d\u0627\u0646 \u0627\u0644\u064a\u0648\u0645\u061f',
@@ -1107,7 +1584,16 @@
         greetEvening: '\u0645\u0633\u0627\u0621 \u0627\u0644\u0646\u0648\u0631',
         greetSep: '\u060c ',
         langToggleLabel: 'EN', langToggleBadge: 'EN',
-        langToggleTip: 'Switch to English'
+        langToggleTip: 'Switch to English',
+        gradesPageTitle: '\u062f\u0631\u062c\u0627\u062a\u064a', gradesPageSub: '\u0646\u0638\u0631\u0629 \u0639\u0627\u0645\u0629 \u0639\u0644\u0649 \u0627\u0644\u0623\u062f\u0627\u0621 \u0627\u0644\u0623\u0643\u0627\u062f\u064a\u0645\u064a',
+        backHome: '\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629 \u2192',
+        gpaLabel: '\u0627\u0644\u0645\u0639\u062f\u0644 \u0627\u0644\u062a\u0631\u0627\u0643\u0645\u064a', gpaCardSub: '\u0645\u0646 \u0664.\u0660',
+        passedLabel: '\u0646\u062c\u062d', failedLabel: '\u0631\u0633\u0628', avgScoreLabel: '\u0645\u062a\u0648\u0633\u0637 \u0627\u0644\u062f\u0631\u062c\u0627\u062a',
+        passedSub: '\u0645\u0627\u062f\u0629', failedSub: '\u0645\u0627\u062f\u0629', avgScoreSub: '\u0647\u0630\u0627 \u0627\u0644\u0641\u0635\u0644',
+        gradeDistTitle: '\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u062f\u0631\u062c\u0627\u062a',
+        allSubjectsTitle: '\u062c\u0645\u064a\u0639 \u0627\u0644\u0645\u0648\u0627\u062f', gradesSubjectCount: '\u0668 \u0645\u0648\u0627\u062f',
+        gradeColSubject: '\u0627\u0644\u0645\u0627\u062f\u0629', gradeColScore: '\u0627\u0644\u062f\u0631\u062c\u0629', gradeColExams: '\u0627\u0644\u0627\u0645\u062a\u062d\u0627\u0646\u0627\u062a', gradeColGrade: '\u0627\u0644\u062a\u0642\u062f\u064a\u0631', gradeColStatus: '\u0627\u0644\u062d\u0627\u0644\u0629',
+        gradePass: '\u0646\u062c\u062d', gradeFail: '\u0631\u0633\u0628'
       }
     };
 
@@ -1345,7 +1831,9 @@
     }
 
     window.__toggleLang = function () {
-      applyLang(window.__currentLang === 'en' ? 'ar' : 'en');
+      var next = window.__currentLang === 'en' ? 'ar' : 'en';
+      applyLang(next);
+      window.dispatchEvent(new CustomEvent('appLangChange', { detail: next }));
     };
 
     /* Keep greeting translated even when profile watcher fires */
@@ -1370,9 +1858,13 @@
       }).observe(greetEl, { childList: true, subtree: true, characterData: true });
     }
 
+    /* Expose applyLang so other scripts can call it */
+    window.__applyLang = applyLang;
+
     /* Init */
     window.__currentLang = localStorage.getItem('appLang') || 'en';
     applyLang(window.__currentLang);
+    window.dispatchEvent(new CustomEvent('appLangChange', { detail: window.__currentLang }));
 
   })();
   </script>
@@ -1589,6 +2081,320 @@
 
       /* Right-panel progress items — subtle tilt */
       tiltify('.progress-item', 5);
+
+    })();
+  </script>
+
+  <!-- ═══════════════════════ GRADES PAGE BUILDER ═══════════════════════ -->
+  <script>
+    (function () {
+
+      /* ── Grade data (bilingual) ── */
+      var GRADE_DATA = {
+        en: [
+          { name: 'Biology',     code: 'BIO-101', score: 92, exams: 5, letter: 'A' },
+          { name: 'Mathematics', code: 'MTH-201', score: 88, exams: 6, letter: 'B' },
+          { name: 'Chemistry',   code: 'CHM-101', score: 75, exams: 4, letter: 'C' },
+          { name: 'History',     code: 'HIS-301', score: 95, exams: 5, letter: 'A' },
+          { name: 'Physics',     code: 'PHY-201', score: 82, exams: 6, letter: 'B' },
+          { name: 'English',     code: 'ENG-101', score: 91, exams: 5, letter: 'A' },
+          { name: 'Economics',   code: 'ECO-201', score: 67, exams: 4, letter: 'D' },
+          { name: 'Psychology',  code: 'PSY-101', score: 78, exams: 3, letter: 'C' }
+        ],
+        ar: [
+          { name: '\u0639\u0644\u0645 \u0627\u0644\u0623\u062d\u064a\u0627\u0621',    code: 'BIO-101', score: 92, exams: 5, letter: 'A' },
+          { name: '\u0627\u0644\u0631\u064a\u0627\u0636\u064a\u0627\u062a',           code: 'MTH-201', score: 88, exams: 6, letter: 'B' },
+          { name: '\u0627\u0644\u0643\u064a\u0645\u064a\u0627\u0621',                 code: 'CHM-101', score: 75, exams: 4, letter: 'C' },
+          { name: '\u0627\u0644\u062a\u0627\u0631\u064a\u062e',                       code: 'HIS-301', score: 95, exams: 5, letter: 'A' },
+          { name: '\u0627\u0644\u0641\u064a\u0632\u064a\u0627\u0621',                 code: 'PHY-201', score: 82, exams: 6, letter: 'B' },
+          { name: '\u0627\u0644\u0644\u063a\u0629 \u0627\u0644\u0625\u0646\u062c\u0644\u064a\u0632\u064a\u0629', code: 'ENG-101', score: 91, exams: 5, letter: 'A' },
+          { name: '\u0627\u0644\u0627\u0642\u062a\u0635\u0627\u062f',                 code: 'ECO-201', score: 67, exams: 4, letter: 'D' },
+          { name: '\u0639\u0644\u0645 \u0627\u0644\u0646\u0641\u0633',               code: 'PSY-101', score: 78, exams: 3, letter: 'C' }
+        ]
+      };
+
+      /* ── Grade letter to GPA points ── */
+      var GRADE_POINTS = { A: 4.0, B: 3.0, C: 2.0, D: 1.0, F: 0.0 };
+
+      /* ── View switcher: hides home sections, shows grades (or vice versa) ── */
+      window.__showDashView = function (view) {
+        var homeEls   = document.querySelectorAll('[data-dash-home]');
+        var gradesEl  = document.getElementById('dash-grades-view');
+        var profileEl = document.getElementById('dash-profile-view');
+        var main      = document.getElementById('app-main');
+
+        /* Hide all sub-views first */
+        if (gradesEl)  gradesEl.style.display  = 'none';
+        if (profileEl) profileEl.style.display = 'none';
+
+        if (view === 'grades') {
+          homeEls.forEach(function (el) { el.style.display = 'none'; });
+          if (gradesEl) gradesEl.style.display = 'flex';
+          if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+          window.__buildGradesView(window.__currentLang || 'en');
+        } else if (view === 'profile') {
+          homeEls.forEach(function (el) { el.style.display = 'none'; });
+          if (profileEl) profileEl.style.display = 'flex';
+          if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+          window.__buildProfileView();
+        } else {
+          /* Restore dashboard home */
+          homeEls.forEach(function (el) { el.style.display = ''; });
+        }
+      };
+
+      /* ── Build Profile Page ── */
+      window.__buildProfileView = function () {
+        var EDU_LABELS = { elementary: 'Elementary', middle: 'Middle School', high: 'High School', university: 'University', postgrad: 'Postgraduate' };
+        var STATUS_LABELS = { student: 'Student', employed: 'Employed', no_job: 'No Job' };
+
+        var name       = localStorage.getItem('userName') || 'Scholar';
+        var occupation = localStorage.getItem('userOccupation') || '';
+        var eduKey     = localStorage.getItem('userEduLevel') || 'elementary';
+        var statusKey  = localStorage.getItem('userEmployment') || 'student';
+        var eduLabel   = EDU_LABELS[eduKey]    || eduKey;
+        var statusLabel= STATUS_LABELS[statusKey] || statusKey;
+        var initial    = name.charAt(0).toUpperCase();
+
+        /* Hero */
+        var heroAvatar = document.getElementById('profile-hero-avatar');
+        var heroName   = document.getElementById('profile-hero-name');
+        var heroOcc    = document.getElementById('profile-hero-occupation');
+        var heroEdu    = document.getElementById('profile-hero-edu');
+        var heroStatus = document.getElementById('profile-hero-status');
+        if (heroAvatar) heroAvatar.textContent = initial;
+        if (heroName)   heroName.textContent   = name;
+        if (heroOcc)    { heroOcc.textContent  = occupation; heroOcc.style.display = occupation ? '' : 'none'; }
+        if (heroEdu)    heroEdu.textContent    = '🎓 ' + eduLabel;
+        if (heroStatus) heroStatus.textContent = statusKey === 'student' ? '📚 Student' : statusKey === 'employed' ? '💼 Employed' : '🔍 Looking';
+
+        /* Info cards */
+        var pName = document.getElementById('pinfo-name');
+        var pOcc  = document.getElementById('pinfo-occupation');
+        var pEdu  = document.getElementById('pinfo-edu');
+        var pStat = document.getElementById('pinfo-status');
+        if (pName) pName.textContent = name;
+        if (pOcc)  pOcc.textContent  = occupation || '—';
+        if (pEdu)  pEdu.textContent  = eduLabel;
+        if (pStat) pStat.textContent = statusLabel;
+
+        /* Activity stats */
+        var actRow = document.getElementById('profile-activity-row');
+        if (actRow) {
+          var exams = 0;
+          ['exams','userExams','generatedExams','savedExams'].forEach(function (k) {
+            try { var a = JSON.parse(localStorage.getItem(k)||'[]'); if (Array.isArray(a) && a.length > exams) exams = a.length; } catch(e){}
+          });
+          actRow.innerHTML =
+            '<div class="gcard" style="text-align:center;padding:20px;">' +
+              '<div style="font-size:28px;font-weight:900;color:#a78bfa;">' + exams + '</div>' +
+              '<div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Exams Created</div>' +
+            '</div>' +
+            '<div class="gcard" style="text-align:center;padding:20px;">' +
+              '<div style="font-size:28px;font-weight:900;color:#34d399;">3</div>' +
+              '<div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Active Goals</div>' +
+            '</div>' +
+            '<div class="gcard" style="text-align:center;padding:20px;">' +
+              '<div style="font-size:28px;font-weight:900;color:#f59e0b;">7</div>' +
+              '<div style="font-size:11px;font-weight:700;color:var(--text-muted,#94a3b8);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;">Day Streak</div>' +
+            '</div>';
+        }
+      };
+
+      /* ── Build the grades page content ── */
+      window.__buildGradesView = function (lang) {
+        lang = lang || 'en';
+        var data = GRADE_DATA[lang] || GRADE_DATA.en;
+        var t = (window.__T && window.__T[lang]) ? window.__T[lang] : {};
+
+        /* --- GPA stat cards --- */
+        var gpa = 0;
+        data.forEach(function (s) { gpa += (GRADE_POINTS[s.letter] || 0); });
+        gpa = (gpa / data.length).toFixed(2);
+        var passed  = data.filter(function (s) { return s.score >= 60; }).length;
+        var failed  = data.length - passed;
+        var avgScore = Math.round(data.reduce(function (a, s) { return a + s.score; }, 0) / data.length);
+
+        var statsEl = document.getElementById('grades-stats-row');
+        if (statsEl) {
+          statsEl.innerHTML =
+            '<div class="gcard gcard-gpa">' +
+              '<div class="gcard-icon">\uD83C\uDF93</div>' +
+              '<div class="gcard-value">' + gpa + '</div>' +
+              '<div class="gcard-label">' + (t.gpaLabel || 'GPA') + '</div>' +
+              '<div class="gcard-sub">' + (t.gpaCardSub || 'Out of 4.0') + '</div>' +
+            '</div>' +
+            '<div class="gcard">' +
+              '<div class="gcard-icon">\u2705</div>' +
+              '<div class="gcard-value">' + passed + '</div>' +
+              '<div class="gcard-label">' + (t.passedLabel || 'Passed') + '</div>' +
+              '<div class="gcard-sub">' + (t.passedSub || 'subjects') + '</div>' +
+            '</div>' +
+            '<div class="gcard">' +
+              '<div class="gcard-icon">\u274C</div>' +
+              '<div class="gcard-value">' + failed + '</div>' +
+              '<div class="gcard-label">' + (t.failedLabel || 'Failed') + '</div>' +
+              '<div class="gcard-sub">' + (t.failedSub || 'subjects') + '</div>' +
+            '</div>' +
+            '<div class="gcard">' +
+              '<div class="gcard-icon">\uD83D\uDCCA</div>' +
+              '<div class="gcard-value">' + avgScore + '%</div>' +
+              '<div class="gcard-label">' + (t.avgScoreLabel || 'Avg Score') + '</div>' +
+              '<div class="gcard-sub">' + (t.avgScoreSub || 'this semester') + '</div>' +
+            '</div>';
+        }
+
+        /* --- Distribution bars --- */
+        var dist = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+        data.forEach(function (s) { if (dist[s.letter] !== undefined) dist[s.letter]++; });
+        var maxCount = Math.max.apply(null, Object.values(dist)) || 1;
+        var distEl = document.getElementById('grades-dist-bars');
+        if (distEl) {
+          distEl.innerHTML = ['A','B','C','D','F'].map(function (ltr) {
+            var pct = Math.round((dist[ltr] / data.length) * 100);
+            return '<div class="dist-row">' +
+              '<span class="dist-letter">' + ltr + '</span>' +
+              '<div class="dist-bar-wrap"><div class="dist-bar-fill dist-fill-' + ltr + '" style="width:' + pct + '%"></div></div>' +
+              '<span class="dist-count">' + dist[ltr] + '</span>' +
+            '</div>';
+          }).join('');
+        }
+
+        /* --- Subjects table --- */
+        var tableEl = document.getElementById('grades-subjects-table');
+        if (tableEl) {
+          var header =
+            '<div class="grade-row-header">' +
+              '<span>' + (t.gradeColSubject || 'Subject') + '</span>' +
+              '<span>' + (t.gradeColScore || 'Score') + '</span>' +
+              '<span style="text-align:center">' + (t.gradeColExams || 'Exams') + '</span>' +
+              '<span style="text-align:center">' + (t.gradeColGrade || 'Grade') + '</span>' +
+              '<span style="text-align:center">' + (t.gradeColStatus || 'Status') + '</span>' +
+            '</div>';
+          var rows = data.map(function (s) {
+            var passText = s.score >= 60 ? (t.gradePass || 'Pass') : (t.gradeFail || 'Fail');
+            var passClass = s.score >= 60 ? 'grade-pass' : 'grade-fail';
+            return '<div class="grade-row">' +
+              '<div class="grade-subject-cell">' +
+                '<span class="grade-subject-name">' + s.name + '</span>' +
+                '<span class="grade-subject-code">' + s.code + '</span>' +
+              '</div>' +
+              '<div class="grade-score-wrap">' +
+                '<span class="grade-score-num">' + s.score + '%</span>' +
+                '<div class="grade-score-bar"><div class="grade-score-fill" style="width:' + s.score + '%"></div></div>' +
+              '</div>' +
+              '<div class="grade-exams-cell">' + s.exams + '</div>' +
+              '<div style="display:flex;justify-content:center"><span class="grade-letter-badge glb-' + s.letter + '">' + s.letter + '</span></div>' +
+              '<div style="display:flex;justify-content:center"><span class="grade-status ' + passClass + '">' + passText + '</span></div>' +
+            '</div>';
+          }).join('');
+          tableEl.innerHTML = header + rows;
+        }
+
+        /* Update grades-page text via T if applyLang missed them */
+        var pgTitle = document.querySelector('#dash-grades-view [data-i18n="gradesPageTitle"]');
+        if (pgTitle) pgTitle.textContent = t.gradesPageTitle || 'My Grades';
+        var pgSub = document.querySelector('#dash-grades-view [data-i18n="gradesPageSub"]');
+        if (pgSub) pgSub.textContent = t.gradesPageSub || 'Academic performance overview';
+        var pgBack = document.querySelector('#dash-grades-view [data-i18n="backHome"]');
+        if (pgBack) pgBack.textContent = (lang === 'ar') ? '\u0627\u0644\u0631\u0626\u064a\u0633\u064a\u0629 \u2192' : '\u2190 Dashboard';
+        var pgCount = document.querySelector('#dash-grades-view [data-i18n="gradesSubjectCount"]');
+        if (pgCount) pgCount.textContent = data.length + ' ' + (lang === 'ar' ? '\u0645\u0648\u0627\u062f' : 'subjects');
+        var pgDistTitle = document.querySelector('#dash-grades-view [data-i18n="gradeDistTitle"]');
+        if (pgDistTitle) pgDistTitle.textContent = t.gradeDistTitle || 'Grade Distribution';
+        var pgAllTitle = document.querySelector('#dash-grades-view [data-i18n="allSubjectsTitle"]');
+        if (pgAllTitle) pgAllTitle.textContent = t.allSubjectsTitle || 'All Subjects';
+      };
+
+      /* Expose T for buildGradesView */
+      window.__T = window.__T || (function () {
+        /* grab from Phase-8 T if available via closure — fallback to empty */
+        return {};
+      })();
+
+      /* Re-build grades if language changes while grades view is open */
+      window.addEventListener('appLangChange', function (e) {
+        var gradesEl = document.getElementById('dash-grades-view');
+        if (gradesEl && gradesEl.style.display !== 'none') {
+          window.__buildGradesView(e.detail);
+        }
+      });
+
+    })();
+  </script>
+
+  <!-- ═══════════════════════ FIX: NAV ALWAYS SHOWS DASHBOARD ═══════════════════════ -->
+
+  <!-- Back-to-dashboard button (only visible when React builder is open) -->
+  <button id="back-to-dash-btn" onclick="window.__shellNav(null,'dashboard')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15,18 9,12 15,6"/>
+    </svg>
+    <span data-i18n="backToDash">Back to Dashboard</span>
+  </button>
+
+  <script>
+    (function () {
+
+      /* Scroll map: which section to reveal per nav view */
+      var SECTION_MAP = {
+        courses:  '#dash-courses-section',
+        exams:    '#dash-exams-section',
+        schedule: '#dash-perf-section',
+        settings: '#dash-header'
+      };
+
+      /* Re-patch __shellNav: always keep overlay visible + toggle views + scroll */
+      var _navPrev = window.__shellNav;
+      window.__shellNav = function (el, view) {
+        var result = _navPrev ? _navPrev.call(window, el, view) : false;
+
+        /* Force overlay back on */
+        var overlay = document.getElementById('dash-overlay');
+        if (overlay) overlay.classList.add('dash-visible');
+
+        /* Hide the back-to-dash button */
+        var backBtn = document.getElementById('back-to-dash-btn');
+        if (backBtn) backBtn.style.display = 'none';
+
+        var v = (el && el.getAttribute && el.getAttribute('data-view')) || view || 'dashboard';
+
+        /* Toggle between grades view and dashboard home */
+        if (window.__showDashView) window.__showDashView(v);
+
+        /* Scroll to the relevant section */
+        if (v === 'dashboard') {
+          var main = document.getElementById('app-main');
+          if (main) main.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (v !== 'grades' && SECTION_MAP[v]) {
+          var target = document.querySelector(SECTION_MAP[v]);
+          if (target) setTimeout(function () {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 50);
+        }
+
+        return result;
+      };
+
+      /* Open the React exam builder (intentionally hide overlay) */
+      window.__openExamBuilder = function () {
+        var overlay = document.getElementById('dash-overlay');
+        if (overlay) overlay.classList.remove('dash-visible');
+        var backBtn = document.getElementById('back-to-dash-btn');
+        if (backBtn) backBtn.style.display = 'flex';
+        /* Remove active highlight from all nav items while in builder */
+        document.querySelectorAll('.s-nav-item').forEach(function (n) { n.classList.remove('s-active'); });
+      };
+
+      /* Add "Back to Dashboard" translation support */
+      var _origApplyLang = window.__applyLang;
+      /* Minimal inline translation for back button */
+      window.addEventListener('appLangChange', function (e) {
+        var backLabel = document.querySelector('#back-to-dash-btn [data-i18n="backToDash"]');
+        if (backLabel) backLabel.textContent = (e.detail === 'ar') ? '\u0627\u0644\u0631\u062c\u0648\u0639 \u0625\u0644\u0649 \u0644\u0648\u062d\u0629 \u0627\u0644\u062a\u062d\u0643\u0645' : 'Back to Dashboard';
+        var createLabel = document.querySelector('#create-exam-btn [data-i18n="createExamBtn"]');
+        if (createLabel) createLabel.textContent = (e.detail === 'ar') ? '\u0625\u0646\u0634\u0627\u0621 \u0627\u0645\u062a\u062d\u0627\u0646' : 'Create Exam';
+      });
 
     })();
   </script>

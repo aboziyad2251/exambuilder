@@ -969,7 +969,59 @@ body::after {
 #dash-overlay.dash-visible { display: flex; }
 
 /* Greeting header */
-#dash-header { padding-bottom: 2px; }
+#dash-header {
+  padding-bottom: 2px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Create Exam button in dash header */
+#create-exam-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 20px;
+  border-radius: 14px; border: none;
+  background: var(--gradient-spectrum);
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: Inter, sans-serif;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  box-shadow: 0 6px 20px rgba(139,92,246,0.38);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#create-exam-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(139,92,246,0.55);
+}
+
+/* Back-to-dashboard floating button (shown when in exam builder mode) */
+#back-to-dash-btn {
+  display: none;
+  position: fixed;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 400;
+  align-items: center; gap: 8px;
+  padding: 12px 24px;
+  border-radius: 999px; border: none;
+  background: rgba(12,16,36,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #fff; font-size: 13px; font-weight: 600;
+  font-family: Inter, sans-serif;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.40);
+  transition: transform 0.2s ease;
+}
+#back-to-dash-btn:hover { transform: translateX(-50%) translateY(-2px); }
+[data-theme="light"] #back-to-dash-btn,
+[data-theme="azure"] #back-to-dash-btn {
+  background: rgba(255,255,255,0.95);
+  color: #1e293b;
+  border-color: rgba(0,0,0,0.08);
+}
 
 #dash-greeting {
   font-family: 'Space Grotesk', Inter, sans-serif;
@@ -1669,3 +1721,198 @@ body::after {
 [dir="rtl"] .exam-title,
 [dir="rtl"] .progress-label,
 [dir="rtl"] .progress-sublabel { font-family: Inter, 'Segoe UI', Tahoma, sans-serif; }
+
+/* ===========================================
+   GRADES PAGE
+   =========================================== */
+
+/* ── Page header row ── */
+#grades-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#grades-page-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted, rgba(255,255,255,0.5));
+}
+
+/* ── GPA stat cards row ── */
+#grades-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+@media (max-width: 900px) { #grades-stats-row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { #grades-stats-row { grid-template-columns: 1fr; } }
+
+.gcard {
+  background: var(--glass-light, rgba(255,255,255,0.08));
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.gcard:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.20); }
+
+.gcard-gpa {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 60%, #f093fb 100%);
+  border-color: transparent;
+}
+.gcard-icon { font-size: 22px; margin-bottom: 4px; }
+.gcard-value {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  color: var(--text-primary, #fff);
+  line-height: 1;
+}
+.gcard-gpa .gcard-value { color: #fff; }
+.gcard-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, rgba(255,255,255,0.55));
+}
+.gcard-gpa .gcard-label { color: rgba(255,255,255,0.80); }
+.gcard-sub {
+  font-size: 12px;
+  color: var(--text-muted, rgba(255,255,255,0.45));
+  margin-top: 2px;
+}
+.gcard-gpa .gcard-sub { color: rgba(255,255,255,0.70); }
+
+/* ── Grade distribution bars ── */
+#grades-dist-bars { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.dist-row { display: flex; align-items: center; gap: 12px; }
+.dist-letter {
+  width: 28px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Space Grotesk', Inter, sans-serif;
+  color: var(--text-primary, #fff);
+  flex-shrink: 0;
+}
+.dist-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.dist-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.dist-count {
+  width: 38px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+  color: var(--text-muted, rgba(255,255,255,0.55));
+  flex-shrink: 0;
+}
+
+/* grade-letter bar colors */
+.dist-fill-A { background: linear-gradient(90deg, #22c55e, #10b981); }
+.dist-fill-B { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+.dist-fill-C { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.dist-fill-D { background: linear-gradient(90deg, #ef4444, #f97316); }
+.dist-fill-F { background: linear-gradient(90deg, #6b7280, #9ca3af); }
+
+/* ── Subjects table ── */
+#grades-subjects-table { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+
+.grade-row-header, .grade-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 80px 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+}
+.grade-row-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted, rgba(255,255,255,0.45));
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding-bottom: 10px;
+}
+.grade-row {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.15s ease;
+}
+.grade-row:hover { background: rgba(255,255,255,0.04); border-radius: 10px; }
+.grade-row:last-child { border-bottom: none; }
+
+.grade-subject-cell { display: flex; flex-direction: column; gap: 2px; }
+.grade-subject-name { font-size: 14px; font-weight: 600; color: var(--text-primary, #fff); }
+.grade-subject-code { font-size: 11px; color: var(--text-muted, rgba(255,255,255,0.45)); }
+
+.grade-score-wrap { display: flex; flex-direction: column; gap: 4px; }
+.grade-score-num { font-size: 13px; font-weight: 600; color: var(--text-primary, #fff); }
+.grade-score-bar { height: 4px; background: rgba(255,255,255,0.10); border-radius: 99px; overflow: hidden; width: 100%; }
+.grade-score-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #8b5cf6, #d946ef); }
+
+.grade-exams-cell { font-size: 13px; color: var(--text-muted, rgba(255,255,255,0.55)); text-align: center; }
+
+.grade-letter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Space Grotesk', Inter, sans-serif;
+}
+.glb-A { background: rgba(34,197,94,0.18);  color: #22c55e; }
+.glb-B { background: rgba(59,130,246,0.18);  color: #60a5fa; }
+.glb-C { background: rgba(245,158,11,0.18);  color: #fbbf24; }
+.glb-D { background: rgba(239,68,68,0.18);   color: #f87171; }
+.glb-F { background: rgba(107,114,128,0.18); color: #9ca3af; }
+
+.grade-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.grade-pass { background: rgba(34,197,94,0.15); color: #22c55e; }
+.grade-fail { background: rgba(239,68,68,0.15); color: #f87171; }
+
+/* ── Light theme overrides ── */
+[data-theme="light"] .gcard {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .gcard-value { color: #1e1b4b; }
+[data-theme="light"] .gcard-label { color: rgba(30,27,75,0.55); }
+[data-theme="light"] .gcard-sub   { color: rgba(30,27,75,0.45); }
+[data-theme="light"] .dist-letter { color: #1e1b4b; }
+[data-theme="light"] .dist-bar-wrap { background: rgba(0,0,0,0.08); }
+[data-theme="light"] .dist-count  { color: rgba(30,27,75,0.55); }
+[data-theme="light"] .grade-subject-name { color: #1e1b4b; }
+[data-theme="light"] .grade-score-num    { color: #1e1b4b; }
+[data-theme="light"] #grades-page-sub    { color: rgba(30,27,75,0.55); }
+
+/* ── RTL overrides ── */
+[dir="rtl"] #grades-page-header  { flex-direction: row-reverse; }
+[dir="rtl"] #grades-page-header > div { text-align: right; }
+[dir="rtl"] .dist-row  { flex-direction: row-reverse; }
+[dir="rtl"] .dist-count { text-align: left; }
+[dir="rtl"] .grade-row, [dir="rtl"] .grade-row-header { direction: rtl; }
+[dir="rtl"] .grade-exams-cell { text-align: center; }
