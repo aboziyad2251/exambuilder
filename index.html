@@ -365,7 +365,7 @@
                 <span id="profile-hero-status" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:20px;padding:3px 12px;font-size:12px;font-weight:700;color:#86efac;"></span>
               </div>
             </div>
-            <button onclick="window.__shellNav(null,'settings')" style="padding:10px 20px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">✏️ Edit Profile</button>
+            <button onclick="window.__openProfileEdit()" style="padding:10px 20px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;color:#fff;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;">✏️ Edit Profile</button>
           </div>
 
           <!-- Info grid -->
@@ -490,7 +490,7 @@
       <!-- Header row -->
       <div id="right-panel-header">
         <h3 id="right-panel-title" data-i18n="rightPanelTitle">Profile</h3>
-        <button id="right-edit-btn" title="Edit profile" onclick="window.__shellNav(null,'settings')">
+        <button id="right-edit-btn" title="Edit profile" onclick="window.__openProfileEdit()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -590,6 +590,47 @@
       </div>
     </div>
     <div id="notif-list" style="flex:1;padding:12px 0;"></div>
+  </div>
+
+  <!-- ═══ SHELL PROFILE EDIT MODAL ═══ -->
+  <div id="shell-profile-overlay" onclick="if(event.target===this)window.__closeProfileEdit()" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(2,6,23,0.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;">
+    <div style="width:100%;max-width:440px;background:#0f172a;border:1px solid rgba(139,92,246,0.3);border-radius:24px;padding:32px;box-shadow:0 0 60px rgba(139,92,246,0.25);position:relative;">
+      <button onclick="window.__closeProfileEdit()" style="position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.06);border:none;color:#94a3b8;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">✕</button>
+      <h2 style="font-size:20px;font-weight:800;color:#fff;margin:0 0 24px;display:flex;align-items:center;gap:10px;">
+        <span style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.2);display:inline-flex;align-items:center;justify-content:center;font-size:16px;">👤</span>
+        Edit Profile
+      </h2>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Full Name</label>
+          <input id="spe-name" type="text" placeholder="Enter your name" style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:11px 14px;color:#fff;font-size:14px;outline:none;box-sizing:border-box;font-family:Inter,sans-serif;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Occupation</label>
+          <input id="spe-occ" type="text" placeholder="e.g. Engineer, Student..." style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:11px 14px;color:#fff;font-size:14px;outline:none;box-sizing:border-box;font-family:Inter,sans-serif;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Education Level</label>
+          <select id="spe-edu" style="width:100%;background:#1e293b;border:1px solid rgba(139,92,246,0.3);border-radius:10px;padding:11px 14px;color:#fff;font-size:14px;outline:none;cursor:pointer;">
+            <option value="elementary">Elementary</option>
+            <option value="middle">Middle School</option>
+            <option value="high">High School</option>
+            <option value="university">University</option>
+            <option value="postgrad">Postgraduate</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Employment Status</label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;" id="spe-status-btns">
+            <button onclick="window.__speSetStatus('student')"  data-status="student"   style="padding:10px 6px;border-radius:10px;border:1px solid rgba(139,92,246,0.25);background:rgba(139,92,246,0.15);color:#a78bfa;font-size:12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">📚<span>Student</span></button>
+            <button onclick="window.__speSetStatus('employed')" data-status="employed"  style="padding:10px 6px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#64748b;font-size:12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">💼<span>Employed</span></button>
+            <button onclick="window.__speSetStatus('no_job')"   data-status="no_job"    style="padding:10px 6px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#64748b;font-size:12px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;">🔍<span>No Job</span></button>
+          </div>
+        </div>
+      </div>
+      <div id="spe-msg" style="display:none;margin-top:14px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;text-align:center;"></div>
+      <button onclick="window.__saveProfileEdit()" style="width:100%;margin-top:20px;padding:14px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#db2777);border:none;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:Inter,sans-serif;">✓ Save Changes</button>
+    </div>
   </div>
 
   <!-- ═══ CALENDAR DAY VIEW MODAL ═══ -->
@@ -2502,6 +2543,78 @@
           /* Table */
           window.__renderHistTable();
         };
+      })();
+
+      /* ── Shell Profile Edit Modal ── */
+      (function () {
+        var _selStatus = 'student';
+
+        window.__openProfileEdit = function () {
+          var overlay = document.getElementById('shell-profile-overlay');
+          if (!overlay) return;
+          /* Pre-fill fields */
+          var nameEl = document.getElementById('spe-name');
+          var occEl  = document.getElementById('spe-occ');
+          var eduEl  = document.getElementById('spe-edu');
+          if (nameEl) nameEl.value = localStorage.getItem('userName') || '';
+          if (occEl)  occEl.value  = localStorage.getItem('userOccupation') || '';
+          if (eduEl)  eduEl.value  = localStorage.getItem('userEduLevel') || 'elementary';
+          _selStatus = localStorage.getItem('userEmployment') || 'student';
+          window.__speSetStatus(_selStatus);
+          var msg = document.getElementById('spe-msg');
+          if (msg) msg.style.display = 'none';
+          overlay.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+          if (nameEl) setTimeout(function(){ nameEl.focus(); }, 100);
+        };
+
+        window.__closeProfileEdit = function () {
+          var overlay = document.getElementById('shell-profile-overlay');
+          if (overlay) overlay.style.display = 'none';
+          document.body.style.overflow = '';
+        };
+
+        window.__speSetStatus = function (status) {
+          _selStatus = status;
+          document.querySelectorAll('#spe-status-btns button').forEach(function (btn) {
+            var active = btn.getAttribute('data-status') === status;
+            btn.style.background     = active ? 'rgba(139,92,246,0.2)'       : 'rgba(255,255,255,0.04)';
+            btn.style.borderColor    = active ? 'rgba(139,92,246,0.5)'       : 'rgba(255,255,255,0.08)';
+            btn.style.color          = active ? '#a78bfa'                    : '#64748b';
+          });
+        };
+
+        window.__saveProfileEdit = function () {
+          var name = (document.getElementById('spe-name') || {}).value || '';
+          var occ  = (document.getElementById('spe-occ')  || {}).value || '';
+          var edu  = (document.getElementById('spe-edu')  || {}).value || 'elementary';
+          if (!name.trim()) {
+            var msg = document.getElementById('spe-msg');
+            if (msg) { msg.style.display='block'; msg.style.background='rgba(239,68,68,0.1)'; msg.style.color='#f87171'; msg.textContent='Please enter your name.'; }
+            return;
+          }
+          /* Save to localStorage */
+          localStorage.setItem('userName',       name.trim());
+          localStorage.setItem('userOccupation', occ.trim());
+          localStorage.setItem('userEduLevel',   edu);
+          localStorage.setItem('userEmployment', _selStatus);
+          /* Show success */
+          var msg = document.getElementById('spe-msg');
+          if (msg) { msg.style.display='block'; msg.style.background='rgba(52,211,153,0.1)'; msg.style.color='#34d399'; msg.textContent='✓ Profile saved!'; }
+          /* Refresh right panel + profile page */
+          setTimeout(function () {
+            window.__closeProfileEdit();
+            if (window.__buildProfileView) window.__buildProfileView();
+          }, 900);
+        };
+
+        /* Allow Enter key to save */
+        document.addEventListener('keydown', function (e) {
+          var overlay = document.getElementById('shell-profile-overlay');
+          if (overlay && overlay.style.display !== 'none' && e.key === 'Enter') {
+            window.__saveProfileEdit();
+          }
+        });
       })();
 
       /* ── Feature 3: Notifications Panel ── */
