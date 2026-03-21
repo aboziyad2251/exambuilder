@@ -1,0 +1,21 @@
+fc9a303 fix: Patch Qf() auth context to always return mock user with isLoaded:true
+0f66c46 fix: Patch jS() to return mock user when unauthenticated, preventing null crashes
+6f35755 fix: Bypass React auth gate so exam builder works without Google sign-in
+6380880 fix: Fix syntax error in GPA calculator breaking grades page, fix hardcoded streak values
+9e444e1 feat: Add GPA Calculator (out of 5) to Grades page with credit hours support
+f8bda97 feat: Replace React profile edit with native shell modal — works without login
+d048333 fix: Profile and Exams nav bypass shell:navigate to prevent React takeover
+77ab02b fix: Profile nav goes to profile page; localStorage saves even if Supabase fails
+272a2a0 fix: Allow settings/profile modal to open by not forcing overlay on for settings nav
+c4f0a5d feat: Theme persistence to DB — save/restore theme with user profile (Feature 5)
+eef60d9 feat: Add Exam History & Analytics page (Feature 6)
+e5b25f3 feat: Add notifications panel, study streak, quick notes (Features 3, 4, 7)
+0c49f2f feat(dashboard): Add profile page, calendar events, education level, and profile sync
+5b56e23 feat(dashboard): Add full Academy dashboard UI with Arabic/RTL support (Phases 1-8)
+47b9cfc fix(lecture): Refactor drag & drop input listeners to prevent Maximum Call Stack exceeded from recursive file input clicks
+4164fb8 fix(lecture): Make drag & drop box clickable, fix classList invalid space bug, remove pointer-events from canvas backdrop
+9a70967 fix(lecture): Fix PDF drag drop, syntax elements, separate Exam Gen, add proper colors for light mode
+cb95157 fix(prod): bust cdn cache on react assets
+7a7cfb1 fix(prod): replace heavy DOM observer with interval to resolve react lockup on mobile and slow instances
+b07c971 feat: integrate lecture analyzer and localized exam modes
+f11a1d0 first commit

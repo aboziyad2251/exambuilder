@@ -9,7 +9,10 @@
       "Bash(scp index.html root@76.13.40.119:/var/www/frontend/exambuilder/)",
       "Bash(scp assets/index-DyN3VeGQ.js root@76.13.40.119:/var/www/frontend/exambuilder/assets/)",
       "Bash(scp assets/index-DJSVmgVU.css root@76.13.40.119:/var/www/frontend/exambuilder/assets/)",
-      "Bash(curl -s \"https://raw.githubusercontent.com/aboziyad2251/exambuilder/main/index.html\")"
+      "Bash(curl -s \"https://raw.githubusercontent.com/aboziyad2251/exambuilder/main/index.html\")",
+      "Bash(ls \"c:\\\\Users\\\\moham\\\\Desktop\\\\Exam-builder\\\\exambuilder\"/*.html)",
+      "Bash(grep -n \"v === ''dashboard'' || v === ''grades'' || v === ''profile''\" \"c:/Users/moham/Desktop/Exam-builder/exambuilder/index.html\")",
+      "Bash(grep -n \"var gradesEl\\\\|var profileEl\\\\|var main\\\\|Hide all sub-views\\\\|if \\(gradesEl\\)\\\\|if \\(profileEl\\)\\\\|view === ''grades''\\\\|view === ''profile''\\\\|Restore dashboard\" \"c:/Users/moham/Desktop/Exam-builder/exambuilder/index.html\")"
     ]
   }
 }
