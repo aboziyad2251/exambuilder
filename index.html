@@ -3268,5 +3268,121 @@
     })();
   </script>
 
+  <!-- ═══════════════════════ APP UPDATE CHECKER ═══════════════════════ -->
+  <div id="update-banner" role="alert" aria-live="polite" style="
+    display: none;
+    position: fixed;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    min-width: 280px;
+    max-width: 480px;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background: var(--upd-bg, #1e293b);
+    color: var(--upd-text, #f1f5f9);
+    border: 1px solid var(--upd-border, rgba(99,102,241,0.45));
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  ">
+    <span style="font-size:1.2rem; flex-shrink:0;">🔄</span>
+    <span id="update-banner-msg" style="flex:1; line-height:1.4;">
+      A new version is available.
+    </span>
+    <button onclick="window.__updateRefresh()" style="
+      flex-shrink: 0;
+      padding: 0.35rem 0.85rem;
+      border-radius: 0.5rem;
+      background: var(--upd-btn-bg, #6366f1);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: inherit;
+      white-space: nowrap;
+    ">Refresh</button>
+    <button onclick="window.__updateDismiss()" aria-label="Dismiss" style="
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--upd-text, #94a3b8);
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 0.15rem 0.25rem;
+    ">✕</button>
+  </div>
+
+  <script>
+    /* ── App Update Checker ──────────────────────────────────────────────
+       Stores the version baked into this page (BOOT_VERSION).
+       Polls /version.json every CHECK_INTERVAL ms and on tab focus.
+       Shows #update-banner when the server version differs.
+    ─────────────────────────────────────────────────────────────────── */
+    (function () {
+      var BOOT_VERSION    = '2026.03.26.1';   /* keep in sync with version.json */
+      var CHECK_INTERVAL  = 5 * 60 * 1000;    /* 5 minutes */
+      var updateDetected  = false;
+
+      var banner = document.getElementById('update-banner');
+      var msg    = document.getElementById('update-banner-msg');
+
+      /* Theme-aware CSS vars for the banner */
+      function applyBannerTheme() {
+        var t = localStorage.getItem('colorTheme') || 'dark';
+        var styles =
+          t === 'light'
+            ? { bg: '#ffffff', text: '#1e293b', border: 'rgba(99,102,241,0.35)', btn: '#6366f1' }
+          : t === 'azure'
+            ? { bg: '#0f1f3d', text: '#e2e8f0', border: 'rgba(56,189,248,0.45)',  btn: '#38bdf8' }
+            : /* dark */
+              { bg: '#1e293b', text: '#f1f5f9', border: 'rgba(99,102,241,0.45)',  btn: '#6366f1' };
+        banner.style.setProperty('--upd-bg',     styles.bg);
+        banner.style.setProperty('--upd-text',   styles.text);
+        banner.style.setProperty('--upd-border', styles.border);
+        banner.style.setProperty('--upd-btn-bg', styles.btn);
+      }
+
+      function showBanner() {
+        applyBannerTheme();
+        var lang = localStorage.getItem('appLang');
+        msg.textContent = (lang === 'ar')
+          ? 'يتوفر إصدار جديد من التطبيق.'
+          : 'A new version is available.';
+        banner.style.display = 'flex';
+      }
+
+      window.__updateRefresh  = function () { location.reload(true); };
+      window.__updateDismiss  = function () { banner.style.display = 'none'; };
+
+      function checkVersion() {
+        if (updateDetected) return;
+        fetch('/version.json', { cache: 'no-store' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (data) {
+            if (data && data.version && data.version !== BOOT_VERSION) {
+              updateDetected = true;
+              showBanner();
+            }
+          })
+          .catch(function () { /* network offline — silently skip */ });
+      }
+
+      /* First check after 30 s (give the page time to settle) */
+      setTimeout(checkVersion, 30 * 1000);
+      setInterval(checkVersion, CHECK_INTERVAL);
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) checkVersion();
+      });
+    })();
+  </script>
+
 </body>
 </html>
