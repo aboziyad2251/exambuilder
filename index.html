@@ -40,6 +40,8 @@
   </script>
 
   <link rel="stylesheet" crossorigin href="./assets/index-DJSVmgVU.css?v=13">
+  <script type="module" crossorigin src="/assets/main-BCEjhXZO.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/BarChart-Di7cBplR.js">
 </head>
 
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
@@ -1646,57 +1648,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════ PHASE 6: RECHARTS SCORE CHART ═══════════════════════ -->
-  <script type="module">
-    import { createElement as h } from 'react';
-    import { createRoot } from 'react-dom/client';
-    import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from 'recharts';
-
-    var SCORES = [
-      { name: 'Bio',  score: 92 }, { name: 'Calc', score: 78 },
-      { name: 'Hist', score: 65 }, { name: 'Chem', score: 88 },
-      { name: 'Phys', score: 71 }, { name: 'Eng',  score: 95 },
-      { name: 'Math', score: 82 }, { name: 'Geo',  score: 74 }
-    ];
-    var COLORS = ['#8b5cf6','#d946ef','#0ea5e9','#22c55e','#f59e0b','#ec4899','#06b6d4','#a855f7'];
-
-    function colors() {
-      var dark = (window.__currentTheme || 'dark') === 'dark';
-      return {
-        tick:   dark ? 'rgba(255,255,255,0.42)' : '#94a3b8',
-        grid:   dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-        ttBg:   dark ? 'rgba(12,16,36,0.97)'    : '#ffffff',
-        ttBdr:  dark ? 'rgba(255,255,255,0.12)'  : 'rgba(0,0,0,0.08)',
-        ttClr:  dark ? '#ffffff' : '#1e293b'
-      };
-    }
-
-    function PerfChart() {
-      var c = colors();
-      return h(ResponsiveContainer, { width: '100%', height: 164 },
-        h(BarChart, { data: SCORES, margin: { top: 4, right: 10, left: -28, bottom: 0 } },
-          h(CartesianGrid, { strokeDasharray: '3 3', stroke: c.grid, vertical: false }),
-          h(XAxis, { dataKey: 'name', tick: { fill: c.tick, fontSize: 11 }, axisLine: false, tickLine: false }),
-          h(YAxis, { domain: [0,100], ticks: [0,25,50,75,100], tick: { fill: c.tick, fontSize: 11 }, axisLine: false, tickLine: false }),
-          h(Tooltip, {
-            cursor: { fill: 'rgba(255,255,255,0.04)' },
-            contentStyle: { background: c.ttBg, border: '1px solid ' + c.ttBdr, borderRadius: '10px', color: c.ttClr, fontSize: '12px', fontFamily: 'Inter,sans-serif', boxShadow: '0 8px 24px rgba(0,0,0,0.20)' },
-            labelStyle: { fontWeight: 700 },
-            formatter: function (v) { return [v + '%', 'Score']; }
-          }),
-          h(Bar, { dataKey: 'score', radius: [7,7,0,0], maxBarSize: 38 },
-            ...SCORES.map(function (_, i) { return h(Cell, { key: i, fill: COLORS[i % COLORS.length] }); })
-          )
-        )
-      );
-    }
-
-    var container = document.getElementById('perf-chart-container');
-    if (container) {
-      try { createRoot(container).render(h(PerfChart)); }
-      catch (e) { container.style.display = 'none'; }
-    }
-  </script>
+  <!-- ═══════════════════════ PHASE 6: RECHARTS SCORE CHART ═══════════════════════ -->
 
   <!-- ═══════════════════════ PHASE 8: ARABIC / RTL LANGUAGE SUPPORT ═══════════════════════ -->
   <script>

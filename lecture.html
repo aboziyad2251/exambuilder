@@ -161,6 +161,20 @@
 
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- PDF.js and Compromise for Offline Analysis -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="https://unpkg.com/compromise"></script>
+  <script>
+    // Global Error Handler for debugging
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+      alert("GLOBAL ERROR: " + msg + "\nLine: " + lineNo + "\nColumn: " + columnNo);
+      return false;
+    };
+
+    // Ensure pdfjsLib is globally available
+    window.pdfjsLib = window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  </script>
 </head>
 
 <body
@@ -276,6 +290,13 @@
         PDF and generating a
         comprehensive
         structured analysis. This may take a minute.</p>
+      
+      <!-- Error Feedback Area -->
+      <div id="error-feedback" class="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 hidden max-w-md">
+        <p class="font-bold mb-1">Analysis Error:</p>
+        <p id="error-message" class="text-sm"></p>
+        <button onclick="location.reload()" class="mt-3 text-xs underline">Reload Page</button>
+      </div>
     </section>
 
     <!-- STATE: RESULTS -->
@@ -647,28 +668,34 @@
       e.stopPropagation();
     });
 
-    fileInput.addEventListener('change', function (e) {
-      if (this.files && this.files.length > 0) {
-        handleFile(this.files[0]);
+    fileInput.addEventListener('change', (e) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        handleFile(files[0]);
       }
     });
 
     function handleFile(file) {
-      if (file.type !== 'application/pdf') {
-        alert("Please upload a PDF file.");
-        fileInput.value = '';
-        return;
+      try {
+        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+          alert("Please upload a valid PDF file.");
+          fileInput.value = '';
+          return;
+        }
+        if (file.size > 50 * 1024 * 1024) {
+          alert("File size too large (max 50MB).");
+          fileInput.value = '';
+          return;
+        }
+        selectedFile = file;
+        fileNameDisplay.textContent = file.name;
+        document.getElementById('file-size-display').textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+        analyzeBtn.disabled = false;
+        fileInput.value = ''; // Reset input to allow selecting the same file again if needed
+      } catch (err) {
+        console.error("Error handling file:", err);
+        alert("There was an error selecting this file. Please try again.");
       }
-      if (file.size > 50 * 1024 * 1024) {
-        alert("File size too large (max 50MB).");
-        fileInput.value = '';
-        return;
-      }
-      selectedFile = file;
-      fileNameDisplay.textContent = file.name;
-      document.getElementById('file-size-display').textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
-      analyzeBtn.disabled = false;
-      fileInput.value = ''; // Reset input to allow selecting the same file again if needed
     }
 
     // PDF to Base64 (for small files)
@@ -679,80 +706,108 @@
       reader.readAsDataURL(file);
     });
 
-    // Main Analyze Flow
+    // Main Analyze Flow (Improved Offline Heuristic Version)
     analyzeBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
 
       sections.upload.classList.add('hidden');
       sections.loading.classList.remove('hidden');
+      
+      // Reset error state
+      const errorFeedback = document.getElementById('error-feedback');
+      if (errorFeedback) errorFeedback.classList.add('hidden');
 
-      const loadMessages = ["Reading PDF...", "Understanding context...", "Extracting concepts...", "Structuring notes..."];
+      const loadMessages = ["Reading PDF locally...", "Analyzing patterns...", "Extracting concepts...", "Structuring notes..."];
       let msgIdx = 0;
       const msgInterval = setInterval(() => {
         msgIdx = (msgIdx + 1) % loadMessages.length;
         loadingText.textContent = loadMessages[msgIdx];
-      }, 2000);
+      }, 1500);
 
       try {
-        const apiKey = "AIzaSyBC30L-HlpnpnkAoNhum1a9Qfc66X--yVk";
-
-        // 1. Prepare payload
-        const base64Data = await fileToBase64(selectedFile);
-        const level = document.getElementById('education-level').value;
-
-        let prompt = `Analyze the attached lecture PDF. Education level: ${level}.
+        console.log("Starting analysis for:", selectedFile.name);
         
-Return a single JSON object with EXACTLY this structure:
-{
-  "summary": {
-    "title": "Main Lecture Title",
-    "tldr": "2 sentence summary",
-    "overview": "Detailed overview paragraph",
-    "chapters": [{ "title": "Section title", "summary": "Section summary", "keyPoints": ["point 1", "point 2"] }]
-  },
-  "notes": "<h2>Main Topic</h2><p>Overview text.</p><ul><li>Key detail 1</li><li>Key detail 2</li></ul><h3>Subtopic</h3><p>Definition of <strong>Concept</strong>: meaning.</p> (Use ONLY valid HTML tags: h2, h3, p, ul, li, strong)",
-  "concepts": [{ "term": "Concept Name", "definition": "Brief definition", "topic": "Category" }],
-  "headings": ["Heading 1", "Heading 2"]
-}
+        // Check dependencies
+        if (typeof pdfjsLib === 'undefined') throw new Error("PDF.js library failed to load. Please check your internet connection.");
+        if (typeof nlp === 'undefined') throw new Error("Compromise NLP library failed to load. Please check your internet connection.");
 
-Ensure the notes HTML string is clean and well-structured. Output strictly valid JSON without any markdown formatting wrappers.`;
+        // 1. Extract Text Locally
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        console.log("ArrayBuffer size:", arrayBuffer.byteLength);
+        
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+        const pdf = await loadingTask.promise;
+        console.log("PDF loaded, pages:", pdf.numPages);
 
-        const payload = {
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType: "application/pdf", data: base64Data } }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.4,
-            responseMimeType: "application/json"
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          if (textContent && textContent.items) {
+            fullText += textContent.items
+              .filter(item => item && typeof item.str === 'string')
+              .map(item => item.str)
+              .join(" ") + "\n";
           }
+        }
+        console.log("Text extracted, length:", fullText.length);
+
+        if (!fullText.trim()) throw new Error("No text content found in PDF.");
+
+        // 2. Process with Compromise (Heuristics)
+        const doc = nlp(fullText);
+        
+        // Better Heuristics for "Lots of Data"
+        const sentences = doc.sentences().out('array') || [];
+        console.log("Total sentences:", sentences.length);
+        
+        // Definitions: lines containing common definition markers
+        const definitions = sentences.filter(s => 
+          s && typeof s === 'string' && / (is|are|means|refers to|defined as|describes) /.test(s.toLowerCase())
+        );
+
+        // Key Points: look for lines that look like list items or short impactful sentences
+        const keyPoints = sentences.filter(s => 
+          s && typeof s === 'string' && s.length > 30 && s.length < 150 && !definitions.includes(s)
+        ).slice(0, 30);
+
+        // Concepts: All nouns that appear frequently
+        const nounsFrequency = doc.nouns().out('frequency') || [];
+        const nouns = nounsFrequency
+          .filter(n => n && n.text && typeof n.text === 'string' && n.text.length > 3 && n.count > 1)
+          .map(n => n.text);
+        
+        console.log("Analysis complete. Definitions:", definitions.length, "Concepts:", nouns.length);
+
+        // 3. Build Result Object
+        const resultObj = {
+          summary: {
+            title: selectedFile.name.replace(".pdf", ""),
+            tldr: definitions.slice(0, 3).join(". ") || "Summary of the main lecture concepts.",
+            overview: keyPoints.slice(0, 5).join(". ") || "General overview of the document content.",
+            chapters: [
+              {
+                title: "Key Definitions",
+                summary: "Essential terminology found in the lecture.",
+                keyPoints: definitions.slice(3, 15)
+              },
+              {
+                title: "Detailed Concepts",
+                summary: "Specific details and context extracted from the material.",
+                keyPoints: keyPoints.slice(5, 20)
+              }
+            ]
+          },
+          notes: `<h2>Lecture Analysis</h2><p>${definitions.slice(0, 2).join(". ")}</p><h3>Core Concepts</h3><ul>${keyPoints.slice(0, 10).map(s => `<li>${s}</li>`).join("")}</ul><h3>Additional Context</h3><p>${keyPoints.slice(10, 15).join(". ")}</p>`,
+          concepts: nouns.slice(0, 25).map(n => ({ 
+            term: n, 
+            definition: definitions.find(d => d.toLowerCase().includes(n.toLowerCase())) || "A key term identified in the lecture material.",
+            topic: "Lecture Concept" 
+          })),
+          headings: ["Overview", "Key Definitions", "Detailed Analysis"]
         };
 
-        // 2. Call Gemini API via REST directly
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`API Error: ${res.status} - ${errText}`);
-        }
-
-        const data = await res.json();
-        if (!data.candidates || data.candidates.length === 0) {
-          throw new Error("No output from model.");
-        }
-        let resultText = data.candidates[0].content.parts[0].text;
-
-        // Clean up markdown markers if any
-        resultText = resultText.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
-
-        const resultObj = JSON.parse(resultText);
-
+        // 4. Populate and Show
         clearInterval(msgInterval);
         populateResults(resultObj);
 
@@ -761,10 +816,21 @@ Ensure the notes HTML string is clean and well-structured. Output strictly valid
 
       } catch (err) {
         clearInterval(msgInterval);
-        alert("Failed to analyze PDF: " + err.message);
-        console.error(err);
-        sections.loading.classList.add('hidden');
-        sections.upload.classList.remove('hidden');
+        console.error("Analysis Error:", err);
+        
+        // Visual Feedback
+        const errorFeedback = document.getElementById('error-feedback');
+        const errorMessage = document.getElementById('error-message');
+        if (errorFeedback && errorMessage) {
+          errorFeedback.classList.remove('hidden');
+          errorMessage.textContent = err.message;
+        } else {
+          alert("Lecture Analysis Error:\n" + err.message);
+        }
+        
+        // Don't immediately hide loading so user can read error
+        // sections.loading.classList.add('hidden');
+        // sections.upload.classList.remove('hidden');
       }
     });
 
@@ -777,15 +843,15 @@ Ensure the notes HTML string is clean and well-structured. Output strictly valid
       document.getElementById('res-overview').textContent = data.summary.overview || "";
 
       if (data.summary.chapters && Array.isArray(data.summary.chapters)) {
-        const chapHTML = data.summary.chapters.map(c => \`
+        const chapHTML = data.summary.chapters.map(c => `
           <div class="border-l-2 border-violet-500 pl-4 py-1 mb-4">
-            <h4 class="font-bold text-slate-900 dark:text-white text-lg">\${c.title}</h4>
-            <p class="text-sm text-slate-600 dark:text-slate-400 mb-2">\${c.summary}</p>
+            <h4 class="font-bold text-slate-900 dark:text-white text-lg">${c.title}</h4>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-2">${c.summary}</p>
             <ul class="list-disc pl-5 text-sm text-slate-700 dark:text-slate-300">
-              \${(c.keyPoints || []).map(p => \`<li>\${p}</li>\`).join('')}
+              ${(c.keyPoints || []).map(p => `<li>${p}</li>`).join('')}
             </ul>
           </div>
-        \`).join('');
+        `).join('');
         document.getElementById('res-chapters').innerHTML = chapHTML;
       }
 
@@ -794,15 +860,15 @@ Ensure the notes HTML string is clean and well-structured. Output strictly valid
 
       // Concepts Tab
       if (data.concepts && Array.isArray(data.concepts)) {
-        const concHTML = data.concepts.map(c => \`
+        const concHTML = data.concepts.map(c => `
           <div class="glass-card p-5 rounded-2xl hover:-translate-y-1 transition-transform">
             <div class="flex justify-between items-start mb-2">
-              <h4 class="font-bold text-violet-700 dark:text-violet-300 text-lg">\${c.term}</h4>
-              <span class="text-[10px] uppercase font-bold bg-black/10 dark:bg-white/10 px-2 py-1 rounded text-slate-600 dark:text-slate-400">\${c.topic || "General"}</span>
+              <h4 class="font-bold text-violet-700 dark:text-violet-300 text-lg">${c.term}</h4>
+              <span class="text-[10px] uppercase font-bold bg-black/10 dark:bg-white/10 px-2 py-1 rounded text-slate-600 dark:text-slate-400">${c.topic || "General"}</span>
             </div>
-            <p class="text-sm text-slate-700 dark:text-slate-300">\${c.definition}</p>
+            <p class="text-sm text-slate-700 dark:text-slate-300">${c.definition}</p>
           </div>
-        \`).join('');
+        `).join('');
         document.getElementById('res-concepts-grid').innerHTML = concHTML;
       }
 
@@ -842,6 +908,7 @@ Ensure the notes HTML string is clean and well-structured. Output strictly valid
       const url = urlInput.value.trim() || "[Insert URL]";
       promptArea.value = `Ask my NotebookLM skill to summarize this lecture: "Write a detailed study guide" using notebook URL: ${ url }`;
     });
+
     document.getElementById('copy-prompt-btn').addEventListener('click', () => {
       navigator.clipboard.writeText(promptArea.value);
       alert("Prompt copied! Paste it in Claude Code.");
@@ -849,10 +916,9 @@ Ensure the notes HTML string is clean and well-structured. Output strictly valid
       promptArea.select();
     });
 
-    // Exam Runner Logic
+    // Exam Runner Logic (Offline Version)
     let currentQuizIndex = 0;
     let score = 0;
-
     document.getElementById('start-exam-inline-btn').addEventListener('click', async () => {
       if (!selectedFile) return alert("Original PDF file lost. Please re-upload.");
       
@@ -864,75 +930,88 @@ Ensure the notes HTML string is clean and well-structured. Output strictly valid
       document.getElementById('exam-loading-state').classList.remove('hidden');
 
       try {
-        const apiKey = "AIzaSyBC30L-HlpnpnkAoNhum1a9Qfc66X--yVk"; 
-        const base64Data = await fileToBase64(selectedFile);
+        // 1. Extract Text
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          fullText += textContent.items.map(item => item.str).join(" ") + "\n";
+        }
+
+        const doc = nlp(fullText);
+        const allNouns = doc.nouns().out('array').filter(n => n.length > 3);
+        const uniqueNouns = Array.from(new Set(allNouns));
+        const sentences = doc.sentences().out('array').filter(s => s.length > 30 && s.length < 150);
         
-        let prompt = `Analyze the attached lecture PDF.Generate a 20 question mock exam for the student based on the material.
-Education level: ${ level }.
-Exam Difficulty: ${ difficulty }.
-
-Return a JSON array of exactly 20 objects with EXACTLY this structure:
-        [
-          {
-            "questionText": "What is...?",
-            "type": "MCQ",
-            "difficulty": "${difficulty}",
-            "answerOptions": ["A", "B", "C", "D"],
-            "correctAnswer": "A",
-            "topic": "Specific Topic Name",
-            "explanation": "Why A is correct"
+        const questions = [];
+        let idCounter = 1;
+        
+        for (const sentence of sentences) {
+          if (questions.length >= 10) break; // Start with 10 for speed
+          
+          const sDoc = nlp(sentence);
+          const nouns = sDoc.nouns().out('array');
+          
+          if (nouns.length > 0 && Math.random() > 0.4) {
+            const targetNoun = nouns[0];
+            const questionText = sentence.replace(new RegExp(targetNoun, 'gi'), "______");
+            
+            const distractors = [];
+            while(distractors.length < 3) {
+              const randomNoun = uniqueNouns[Math.floor(Math.random() * uniqueNouns.length)];
+              if (randomNoun && randomNoun.toLowerCase() !== targetNoun.toLowerCase() && !distractors.includes(randomNoun)) {
+                distractors.push(randomNoun);
+              }
+            }
+            const options = [targetNoun, ...distractors].sort(() => Math.random() - 0.5);
+            
+            questions.push({
+              questionText: questionText,
+              type: "MCQ",
+              difficulty: difficulty,
+              answerOptions: options,
+              correctAnswer: targetNoun,
+              topic: "General",
+              explanation: `Based on the lecture text: "${sentence}"`
+            });
+          } else {
+            let isTrue = Math.random() > 0.5;
+            let qText = sentence;
+            if (!isTrue) {
+              if (qText.includes(" is ")) qText = qText.replace(" is ", " is not ");
+              else if (qText.includes(" are ")) qText = qText.replace(" are ", " are not ");
+              else isTrue = true;
+            }
+            questions.push({
+              questionText: qText,
+              type: "TrueFalse",
+              difficulty: difficulty,
+              answerOptions: ["True", "False"],
+              correctAnswer: isTrue ? "True" : "False",
+              topic: "General",
+              explanation: isTrue ? "This statement matches the lecture text." : "The original text was modified."
+            });
           }
-        ]
-Output strictly valid JSON without any markdown formatting wrappers.`;
+        }
 
-        const payload = {
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType: "application/pdf", data: base64Data } }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.5,
-            responseMimeType: "application/json"
-          }
-        };
+        if (questions.length === 0) throw new Error("Could not find enough content to generate questions.");
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+        globalExamData = questions;
+        document.getElementById('exam-loading-state').classList.add('hidden');
+        document.getElementById('exam-runner').classList.remove('hidden');
 
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`API Error: ${res.status} - ${errText}`);
+        currentQuizIndex = 0;
+        score = 0;
+        renderCurrentQuestion();
+
+      } catch (err) {
+        document.getElementById('exam-loading-state').classList.add('hidden');
+        document.getElementById('exam-intro').classList.remove('hidden');
+        alert("Failed to generate offline exam: " + err.message);
+        console.error(err);
       }
-
-      const data = await res.json();
-      if (!data.candidates || data.candidates.length === 0) {
-        throw new Error("No output from model.");
-      }
-
-      let resultText = data.candidates[0].content.parts[0].text;
-      resultText = resultText.replace(/^```json/i, '').replace(/^```/i, '').replace(/```$/i, '').trim();
-
-      // Save exam globally
-      globalExamData = JSON.parse(resultText);
-
-      document.getElementById('exam-loading-state').classList.add('hidden');
-      document.getElementById('exam-runner').classList.remove('hidden');
-
-      currentQuizIndex = 0;
-      score = 0;
-      renderCurrentQuestion();
-
-    } catch (err) {
-      document.getElementById('exam-loading-state').classList.add('hidden');
-      document.getElementById('exam-intro').classList.remove('hidden');
-      alert("Failed to generate exam: " + err.message);
-      console.error(err);
-    }
     });
 
     function renderCurrentQuestion() {
