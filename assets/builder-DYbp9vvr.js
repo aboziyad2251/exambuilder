@@ -673,16 +673,25 @@ You must strictly adhere to the target audience context and strict structural co
 ### 4. JSON OUTPUT FORMAT ENFORCEMENT
 - You must output ONLY a raw, minified JSON object that strictly conforms to the requested JSON schema.
 - Do NOT wrap the JSON output in markdown blocks (e.g., do not use \`\`\`json ... \`\`\`).
-- Never output any conversational filler, markdown formatting, or preamble. Start directly with the character '{' and end with '}'.`;}const s=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json",Authorization:auth},body:JSON.stringify({model:model,messages:[{role:"system",content:sysContent},{role:"user",content:i}],temperature:.2,max_tokens:t})});if(!s.ok){const o=await s.text();const name=url.includes("googleapis.com")?"Gemini":"DeepSeek";throw new Error(`${name} API error (${s.status}): ${o}`)}return(await s.json()).choices[0].message.content},EU=async(i,t,e,n)=>{const s=await zN(i),r=t==="ar"?"OUTPUT MUST BE IN ARABIC.":"Output must be in English.",o=Math.floor(Math.random()*1e6),a=`Analyze the PDF text below and generate exactly 20 unique exam questions (mix of MCQ and TrueFalse).
+- Never output any conversational filler, markdown formatting, or preamble. Start directly with the character '{' and end with '}'.`;}const s=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json",Authorization:auth},body:JSON.stringify({model:model,messages:[{role:"system",content:sysContent},{role:"user",content:i}],temperature:.2,max_tokens:t,response_format:{type:"json_object"}})});if(!s.ok){const o=await s.text();const name=url.includes("googleapis.com")?"Gemini":"DeepSeek";throw new Error(`${name} API error (${s.status}): ${o}`)}return(await s.json()).choices[0].message.content},EU=async(i,t,e,n)=>{const s=await zN(i),r=t==="ar"?"OUTPUT MUST BE IN ARABIC.":"Output must be in English.",o=Math.floor(Math.random()*1e6),a=`Analyze the PDF text below and generate exactly 20 unique exam questions (mix of MCQ and TrueFalse).
 Target Audience: ${e}. Difficulty: ${n}. Seed: ${o}.
 ${r}
+
+CRITICAL RULES FOR RIGOROUS ACADEMIC QUESTIONS:
+1. BANNED TRIVIA: Never ask about book/article titles, author/researcher names, publishers, or publication dates/years.
+2. BAN ROTE MEMORIZATION: Never generate questions that ask for simple definitions or literal text matching (e.g., "What is the definition of X?").
+3. BLOOM'S TAXONOMY: All questions must target higher-order thinking (Applying, Analyzing, Evaluating).
+   - Frame questions around scenarios, case studies, or problems requiring application of concepts.
+   - For every question, you must specify the "cognitiveLevel" field as one of: "Applying", "Analyzing", or "Evaluating".
+4. DYNAMIC CALIBRATION: The vocabulary, scenario complexity, and distractor difficulty must precisely match a student at the "${e}" level taking a "${n}" difficulty exam.
+5. QUALITY MCQ DISTRACTORS: MCQs must have exactly 4 options. Distractors (incorrect options) must be highly plausible, representing common student misconceptions, not obviously wrong or simple opposites.
 
 Here is the PDF content:
 ---
 ${s}
 ---
 
-Return ONLY a valid JSON object with this exact structure (no markdown, no explanation):
+Return ONLY a valid JSON object with this exact structure (no markdown wrapper, no conversational preamble or postscript):
 {
   "courseName": "string",
   "topics": ["string"],
@@ -695,14 +704,15 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no expla
       "options": ["A", "B", "C", "D"],
       "correctAnswer": "A",
       "difficulty": "${n}",
-      "topic": "topic name"
+      "topic": "topic name",
+      "cognitiveLevel": "Applying"
     }
   ]
 }
 
 Rules:
-- MCQ: type must be exactly "Multiple Choice", exactly 4 options, correctAnswer must match one option exactly.
-- TrueFalse: type must be exactly "True/False", options must be ["True","False"], correctAnswer is "True" or "False".
+- MCQ: type must be exactly "Multiple Choice", options must have exactly 4 items, correctAnswer must match one of the options exactly.
+- TrueFalse: type must be exactly "True/False", options must be exactly ["True", "False"], correctAnswer must be exactly "True" or "False", cognitiveLevel must still be "Applying", "Analyzing", or "Evaluating".
 - Generate at least 15 MCQ and 5 TrueFalse questions.`,l=await iA(a,8192,e,n),c=nA(l),h=c.questions.map(f=>({...f,type:f.type==="MCQ"||f.type==="Multiple Choice"?xb.MCQ:xb.TrueFalse}));return{metadata:{courseName:c.courseName,topics:c.topics,concepts:c.concepts},questions:h}},TU=async(i,t,e)=>{const n=await zN(i),r=`Analyze this PDF text below and create a comprehensive study guide for a ${e} student.
 ${t==="ar"?"OUTPUT MUST BE IN ARABIC.":"Output must be in English."}
 
